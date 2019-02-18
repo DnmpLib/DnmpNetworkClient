@@ -146,7 +146,7 @@ namespace DNMPWindowsClient
                 DestinationAddress = IPAddress.Broadcast
             };
             var ethernetPacket = new EthernetPacket(GetPhysicalAddressFromId(eventArgs.SourceId),
-                new PhysicalAddress(new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}), EthernetPacketType.IpV4)
+                new PhysicalAddress(new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}), EthernetPacketType.IPv4)
             {
                 PayloadPacket = ipv4Packet
             };
@@ -186,7 +186,7 @@ namespace DNMPWindowsClient
                     // ReSharper disable once SwitchStatementMissingSomeCases
                     switch (p.Type)
                     {
-                        case EthernetPacketType.IpV4:
+                        case EthernetPacketType.IPv4:
                             var ipv4Packet = (IPv4Packet) p.PayloadPacket;
                             var id = GetIdFromPhysicalAddress(p.DestinationHwAddress);
                             if (id == 0xFFFE)

@@ -43,6 +43,8 @@ namespace DNMPWindowsClient.PacketParser
 
         }
 
+        public byte[] Payload => new byte[0];
+
         public byte[] ToBytes()
         {
             var stream = new MemoryStream();

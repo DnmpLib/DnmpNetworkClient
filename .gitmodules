@@ -4,6 +4,3 @@
 [submodule "NetGain"]
 	path = NetGain
 	url = https://github.com/radioegor146/NetGain.git
-[submodule "Packet.Net"]
-	path = Packet.Net
-	url = https://github.com/radioegor146/Packet.Net.git

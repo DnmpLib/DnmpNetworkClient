@@ -38,11 +38,21 @@ namespace DNMPWindowsClient.PacketParser
                     break;
             }
         }
+
+        internal EthernetPacket(PhysicalAddress sourceAddress, PhysicalAddress destinationAddress,
+            IPacket payloadPacket)
+        {
+            SourceAddress = sourceAddress;
+            DestinationAddress = destinationAddress;
+            PayloadPacket = payloadPacket;
+        }
+
         internal static EthernetPacket Parse(byte[] bytes)
         {
             var packetStream = new MemoryStream(bytes);
             return new EthernetPacket(packetStream);
         }
+
 
         public byte[] Payload => PayloadPacket.ToBytes();
 

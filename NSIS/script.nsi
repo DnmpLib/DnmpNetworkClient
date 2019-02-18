@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "DNMP Client"
 !define PRODUCT_VERSION "1.0.0.0"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\DynNetWindowsClient.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\DNMPWindowsClient.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "NSIS:StartMenuDir"
@@ -42,7 +42,7 @@ var ICONS_GROUP
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\DynNetWindowsClient.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\DNMPWindowsClient.exe"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -74,7 +74,7 @@ Section "Tap-Windows" SEC01
   ExecWait "$INSTDIR\tap-windows.exe" $0
   Delete "$INSTDIR\tap-windows.exe"
   ${IF} $0 != 0
-    DetailPrint "tap-windows installation failed"
+    DetailPrint "TAP-Windows installation failed"
     Abort
   ${ENDIF}
 SectionEnd
@@ -84,10 +84,10 @@ Section ".NET Framework" SEC02
   ReadRegDWORD $dotNET45IsThere HKLM "SOFTWARE\Microsoft\NET Framework Setup\NDP\v4\Full" "Release"
   IntCmp $dotNET45IsThere 378389 is_equal is_less is_greater
   is_equal:
-    DetailPrint ".NET Installation skipped"
+    DetailPrint ".NET installation skipped"
     Goto dot_net_not_needed
   is_greater:
-    DetailPrint ".NET Installation skipped"
+    DetailPrint ".NET installation skipped"
     Goto dot_net_not_needed
   is_less:
   NSISdl::download "https://download.microsoft.com/download/E/2/1/E21644B5-2DF2-47C2-91BD-63C560427900/NDP452-KB2901907-x86-x64-AllOS-ENU.exe" "$INSTDIR\dotnetinstall.exe"
@@ -99,10 +99,10 @@ SectionEnd
 Section "MainSection" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite try
-  File /r "..\DynNetWindowsClient\bin\Release\"
+  File /r "..\DNMPWindowsClient\bin\Release\"
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\DNMP Client.lnk" "$INSTDIR\DynNetWindowsClient.exe"
-  CreateShortCut "$DESKTOP\DNMP Client.lnk" "$INSTDIR\DynNetWindowsClient.exe"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\DNMP Client.lnk" "$INSTDIR\DNMPWindowsClient.exe"
+  CreateShortCut "$DESKTOP\DNMP Client.lnk" "$INSTDIR\DNMPWindowsClient.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
@@ -115,10 +115,10 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\DynNetWindowsClient.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\DNMPWindowsClient.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\DynNetWindowsClient.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\DNMPWindowsClient.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
 SectionEnd
 
@@ -139,7 +139,6 @@ Section Uninstall
   Delete "$INSTDIR\*"
 
   Delete "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk"
-  Delete "$SMPROGRAMS\$ICONS_GROUP\Website.lnk"
   Delete "$DESKTOP\DNMP Client.lnk"
   Delete "$SMPROGRAMS\$ICONS_GROUP\DNMP Client.lnk"
 

@@ -175,15 +175,6 @@
     <Content Include="www-data\content\js\popper.min.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Content Include="www-data\content\webfonts\fa-brands-400.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="www-data\content\webfonts\fa-regular-400.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-    <Content Include="www-data\content\webfonts\fa-solid-900.svg">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="www-data\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

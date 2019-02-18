@@ -1,0 +1,141 @@
+#start-bg-loader {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: #EEE;
+	display: flex;
+	justify-content: center;
+	align-items: center; 
+	flex-direction: column;
+	z-index: 1000;
+}
+
+#processing-loader {
+	position: fixed;
+	width: 100%;
+	height: 100%;
+	top: 0;
+	left: 0;
+	background-color: rgba(0, 0, 0, .5);
+	display: flex;
+	justify-content: center;
+	align-items: center; 
+	flex-direction: column;
+	z-index: 1000;
+	color: white;
+}
+
+.spinner {
+	width: 40px;
+	height: 40px;
+	background-color: #333;
+
+	margin: 20px;
+	-webkit-animation: sk-rotateplane 1.2s infinite ease-in-out;
+	animation: sk-rotateplane 1.2s infinite ease-in-out;
+}
+
+.spinner-white {
+	background-color: white;
+}
+
+.sidebar {
+	height: 100%;
+	background-color: black;
+	color: white;
+	position: fixed;
+	width: 200px;
+}
+
+.sidebar-button {
+	border: none;
+	background-color: black;
+	color: white;
+	width: 100%;
+	padding: 10px;
+	text-align: left;
+}
+
+.sidebar-button:hover {
+	background-color: #444;
+	cursor: hand;
+}
+
+.sidebar-button:focus {
+	outline: 0;
+}
+
+.sidebar-button-active {
+	background-color: white;
+	color: black;
+	cursor: default;
+}
+
+.sidebar-button-active:hover {
+	background-color: white;
+	cursor: default;
+}
+
+.sidebar-logo {
+	width: 100%;
+	padding: 20px;
+	text-align: center;
+	font-size: 40px;
+}
+
+.content-main {
+	padding: 20px;
+	margin-left: 200px;
+}
+
+.row-main {
+	margin: 0;
+}
+
+@-webkit-keyframes sk-rotateplane {
+	0% { -webkit-transform: perspective(120px) }
+	50% { -webkit-transform: perspective(120px) rotateY(180deg) }
+	100% { -webkit-transform: perspective(120px) rotateY(180deg)  rotateX(180deg) }
+}
+
+@keyframes sk-rotateplane {
+	0% { 
+		transform: perspective(120px) rotateX(0deg) rotateY(0deg);
+		-webkit-transform: perspective(120px) rotateX(0deg) rotateY(0deg) 
+	} 50% { 
+		transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg);
+		-webkit-transform: perspective(120px) rotateX(-180.1deg) rotateY(0deg) 
+	} 100% { 
+		transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+		-webkit-transform: perspective(120px) rotateX(-180deg) rotateY(-179.9deg);
+	}
+}
+
+.self-client-row {
+	font-weight: bold;
+}
+
+#networks-table td {
+	cursor: hand;
+}
+
+#networks-table .active td {
+	background: #333;
+	color: white;
+}
+
+#key-code-output {
+	white-space: normal;
+    word-break: break-word;
+}
+
+#invite-code-output {
+	white-space: normal;
+    word-break: break-word;
+}
+
+.modal-dialog {
+	min-width: 800px;
+}

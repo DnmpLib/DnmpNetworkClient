@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1A57D6E7-45A0-403E-A319-B85354F75BC6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>DynNetWindowsClient</RootNamespace>
-    <AssemblyName>DynNetWindowsClient</AssemblyName>
+    <RootNamespace>DNMPWindowsClient</RootNamespace>
+    <AssemblyName>DNMPWindowsClient</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -49,7 +49,7 @@
     <AllowedReferenceRelatedFileExtensions>.pdb;.pri</AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>DynNetWindowsClient.Program</StartupObject>
+    <StartupObject>DNMPWindowsClient.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>NotifyIcon.ico</ApplicationIcon>

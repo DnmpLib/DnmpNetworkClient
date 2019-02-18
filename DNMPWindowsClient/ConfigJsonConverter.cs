@@ -7,7 +7,7 @@ using DNMPLibrary.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DynNetWindowsClient
+namespace DNMPWindowsClient
 {
     internal class ConfigJsonConverter : JsonConverter
     {

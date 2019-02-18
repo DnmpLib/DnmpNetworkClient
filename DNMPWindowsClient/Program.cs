@@ -16,7 +16,7 @@ using DNMPLibrary.Security;
 using DNMPLibrary.Util;
 using Newtonsoft.Json.Linq;
 using NLog;
-using DynNetWindowsClient.Properties;
+using DNMPWindowsClient.Properties;
 using Newtonsoft.Json;
 using uhttpsharp;
 using uhttpsharp.RequestProviders;
@@ -26,7 +26,7 @@ using StackExchange.NetGain.WebSockets;
 using TcpClient = StackExchange.NetGain.TcpClient;
 using Timer = System.Threading.Timer;
 
-namespace DynNetWindowsClient
+namespace DNMPWindowsClient
 {
     internal class Program
     {

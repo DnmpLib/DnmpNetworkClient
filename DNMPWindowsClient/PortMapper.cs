@@ -9,7 +9,7 @@ using LumiSoft.Net.STUN.Client;
 using NLog;
 using Open.Nat;
 
-namespace DynNetWindowsClient
+namespace DNMPWindowsClient
 {
     internal static class PortMapperUtils
     {

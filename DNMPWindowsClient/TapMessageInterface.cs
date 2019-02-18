@@ -17,7 +17,7 @@ using DNMPLibrary.Client;
 using PacketDotNet.Utils;
 using NLog;
 
-namespace DynNetWindowsClient
+namespace DNMPWindowsClient
 {
     public class TapMessageInterface : MessageInterface
     {

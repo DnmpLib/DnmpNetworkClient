@@ -8,7 +8,7 @@ using DNMPLibrary.Security;
 using DNMPLibrary.Util;
 using Newtonsoft.Json;
 
-namespace DynNetWindowsClient
+namespace DNMPWindowsClient
 {
     internal class NetworkManager
     {

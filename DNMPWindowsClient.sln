@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27703.2026
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNMPWindowsClient", "DynNetWindowsClient\DNMPWindowsClient.csproj", "{1A57D6E7-45A0-403E-A319-B85354F75BC6}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNMPWindowsClient", "DNMPWindowsClient\DNMPWindowsClient.csproj", "{1A57D6E7-45A0-403E-A319-B85354F75BC6}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DNMPLibrary", "DNMPLibrary\DNMPLibrary\DNMPLibrary.csproj", "{6DEE7EFB-C645-4E50-B6A3-9ACD533E3C10}"
 EndProject

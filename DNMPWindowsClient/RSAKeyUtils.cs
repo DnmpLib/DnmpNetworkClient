@@ -26,7 +26,7 @@ using System.Globalization;
 using System.IO;
 using System.Security.Cryptography;
 
-namespace DynNetWindowsClient
+namespace DNMPWindowsClient
 {
     class RSAKeyUtils
     {

@@ -9,12 +9,11 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
-using PacketDotNet;
 using System.Net.NetworkInformation;
 using System.Security.Principal;
 using System.Threading;
 using DNMPLibrary.Client;
-using PacketDotNet.Utils;
+using DNMPWindowsClient.PacketParser;
 using NLog;
 
 namespace DNMPWindowsClient
@@ -140,23 +139,20 @@ namespace DNMPWindowsClient
             if (!initialized)
                 return;
 
-            var ipv4Packet = new IPv4Packet(new ByteArraySegment(eventArgs.Data))
-            {
-                SourceAddress = GetIpFromPhysicalAddress(GetPhysicalAddressFromId(eventArgs.SourceId)),
-                DestinationAddress = IPAddress.Broadcast
-            };
+            var ipv4Packet = IPv4Packet.Parse(eventArgs.Data);
+            ipv4Packet.SourceAddress = GetIpFromPhysicalAddress(GetPhysicalAddressFromId(eventArgs.SourceId));
+            ipv4Packet.DestinationAddress = IPAddress.Broadcast;
+
             var ethernetPacket = new EthernetPacket(GetPhysicalAddressFromId(eventArgs.SourceId),
-                new PhysicalAddress(new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}), EthernetPacketType.IPv4)
-            {
-                PayloadPacket = ipv4Packet
-            };
+                new PhysicalAddress(new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}), ipv4Packet);
+
             if (!eventArgs.IsBroadcast)
             {
                 ipv4Packet.DestinationAddress = GetIpFromPhysicalAddress(tapNetworkInterface.GetPhysicalAddress());
-                ethernetPacket.DestinationHwAddress = tapNetworkInterface.GetPhysicalAddress();
+                ethernetPacket.DestinationAddress = tapNetworkInterface.GetPhysicalAddress();
             }
 
-            var packetData = ethernetPacket.Bytes;
+            var packetData = ethernetPacket.ToBytes();
             
             await tapStream.WriteAsync(packetData, 0, packetData.Length);
             await Task.Delay(0);
@@ -180,46 +176,40 @@ namespace DNMPWindowsClient
                     var readBytes = await tapStream.ReadAsync(buffer, 0, 4096, cancellationToken);
                     if (readBytes <= 0)
                         continue;
-                    var p = (EthernetPacket) Packet.ParsePacket(LinkLayers.Ethernet, buffer);
-                    if (p.DestinationHwAddress.GetAddressBytes().Take(3).SequenceEqual(new byte[] {0x01, 0x00, 0x5E}))
+                    var p = EthernetPacket.Parse(buffer.Take(readBytes).ToArray());
+                    if (p.DestinationAddress.GetAddressBytes().Take(3).SequenceEqual(new byte[] {0x01, 0x00, 0x5E}))
                         continue;
                     // ReSharper disable once SwitchStatementMissingSomeCases
                     switch (p.Type)
                     {
-                        case EthernetPacketType.IPv4:
-                            var ipv4Packet = (IPv4Packet) p.PayloadPacket;
-                            var id = GetIdFromPhysicalAddress(p.DestinationHwAddress);
+                        case EthernetPacket.PacketType.IpV4:
+                            var id = GetIdFromPhysicalAddress(p.DestinationAddress);
                             if (id == 0xFFFE)
-                                await Broadcast(ipv4Packet.Bytes);
+                                await Broadcast(p.PayloadPacket.Payload);
                             if (HostExists(id) || id == selfId)
                             {
-                                await Send(ipv4Packet.Bytes, id);
+                                await Send(p.PayloadPacket.Payload, id);
                             }
-
                             break;
-                        case EthernetPacketType.Arp:
-                            var arpPacket = (ARPPacket) p.PayloadPacket;
-                            var targetId =
-                                GetIdFromPhysicalAddress(GetPhysicalAddressFromIp(arpPacket.TargetProtocolAddress));
+                        case EthernetPacket.PacketType.Arp:
+                            var arpPacket = (ArpPacket) p.PayloadPacket;
+                            var targetIp = new IPAddress(arpPacket.TargetProtocolAddress);
+                            var targetId = GetIdFromPhysicalAddress(GetPhysicalAddressFromIp(targetIp));
                             if (!HostExists(targetId))
                                 break;
-
-                            var answerArpPacket = new ARPPacket(ARPOperation.Response, //-V3066
-                                arpPacket.SenderHardwareAddress,
-                                arpPacket.SenderProtocolAddress,
-                                GetPhysicalAddressFromIp(arpPacket.TargetProtocolAddress),
-                                arpPacket.TargetProtocolAddress);
-                            var answerEthernetPacket =
-                                new EthernetPacket(GetPhysicalAddressFromIp(arpPacket.TargetProtocolAddress),
-                                    arpPacket.SenderHardwareAddress, EthernetPacketType.Arp)
-                                {
-                                    PayloadPacket = answerArpPacket
-                                };
-                            await tapStream.WriteAsync(answerEthernetPacket.Bytes, 0, answerEthernetPacket.Bytes.Length,
-                                cancellationToken);
+                            var answerArpPacket = new ArpPacket
+                            {
+                                TargetHardwareAddress = arpPacket.SenderHardwareAddress,
+                                TargetProtocolAddress = arpPacket.SenderProtocolAddress,
+                                SenderHardwareAddress = GetPhysicalAddressFromIp(targetIp).GetAddressBytes(),
+                                SenderProtocolAddress = arpPacket.TargetProtocolAddress
+                            };
+                            var answerEthernetPacket = new EthernetPacket(GetPhysicalAddressFromIp(targetIp), new PhysicalAddress(arpPacket.SenderHardwareAddress), answerArpPacket);
+                            var answerData = answerEthernetPacket.ToBytes();
+                            await tapStream.WriteAsync(answerData, 0, answerData.Length, cancellationToken);
                             break;
                         default:
-                            break;
+                            continue;
                     }
                 }
                 catch (TaskCanceledException)

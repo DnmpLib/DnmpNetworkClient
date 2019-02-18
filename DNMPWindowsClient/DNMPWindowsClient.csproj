@@ -214,10 +214,6 @@
       <Project>{a22dbaa1-19fc-4d67-af90-0114ef471d58}</Project>
       <Name>StackExchange.NetGain</Name>
     </ProjectReference>
-    <ProjectReference Include="..\Packet.Net\PacketDotNet\PacketDotNet.csproj">
-      <Project>{55abba4c-aaf9-4726-a592-0c92436cec92}</Project>
-      <Name>PacketDotNet</Name>
-    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

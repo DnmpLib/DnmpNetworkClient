@@ -22,7 +22,7 @@ namespace DNMPWindowsClient.PacketParser
             preAddress = reader.ReadBytes(12);
             SourceAddress = new IPAddress(reader.ReadBytes(4));
             DestinationAddress = new IPAddress(reader.ReadBytes(4));
-            postAddress = reader.ReadBytes(BitConverter.ToUInt16(preAddress, 6) & 0b0001111111111111);
+            postAddress = reader.ReadBytes(Math.Max(((preAddress[0] & 0b00001111) - 5) * 4, 0));
             PayloadPacket = new DummyPacket(stream);
         }
 

@@ -153,7 +153,7 @@ namespace DNMPWindowsClient
             }
 
             var packetData = ethernetPacket.ToBytes();
-            
+
             await tapStream.WriteAsync(packetData, 0, packetData.Length);
             await Task.Delay(0);
         }
@@ -185,11 +185,9 @@ namespace DNMPWindowsClient
                         case EthernetPacket.PacketType.IpV4:
                             var id = GetIdFromPhysicalAddress(p.DestinationAddress);
                             if (id == 0xFFFE)
-                                await Broadcast(p.PayloadPacket.Payload);
+                                await Broadcast(p.Payload);
                             if (HostExists(id) || id == selfId)
-                            {
-                                await Send(p.PayloadPacket.Payload, id);
-                            }
+                                await Send(p.Payload, id);
                             break;
                         case EthernetPacket.PacketType.Arp:
                             var arpPacket = (ArpPacket) p.PayloadPacket;

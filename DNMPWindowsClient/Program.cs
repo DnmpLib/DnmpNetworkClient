@@ -700,7 +700,7 @@ namespace DNMPWindowsClient
                 }
                 if (url.EndsWith("/"))
                     url += "index.html";
-                var filePath = $"../../www-data{url.Replace("..", "")}";
+                var filePath = $"www-data{url.Replace("..", "")}";
                 context.Response = File.Exists(filePath) ?
                     new HttpResponse(HttpResponseCode.Ok, MimeTypeHelper.GetMimeType(Path.GetExtension(url)), new MemoryStream(File.ReadAllBytes(filePath)), false) :
                     new HttpResponse(HttpResponseCode.NotFound, Encoding.UTF8.GetBytes($"<pre>File `{filePath}` not found</pre>"), false);

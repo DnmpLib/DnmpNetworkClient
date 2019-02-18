@@ -8,7 +8,7 @@ using System.Net;
 
 namespace DNMPWindowsClient.PacketParser
 {
-    internal sealed class IPv4Packet : IPacket
+    internal sealed class IpV4Packet : IPacket
     {
         internal IPAddress SourceAddress;
         internal IPAddress DestinationAddress;
@@ -16,7 +16,7 @@ namespace DNMPWindowsClient.PacketParser
         private readonly byte[] postAddress;
         internal IPacket PayloadPacket;
 
-        internal IPv4Packet(Stream stream)
+        internal IpV4Packet(Stream stream)
         {
             var reader = new BinaryReader(stream);
             preAddress = reader.ReadBytes(12);
@@ -26,10 +26,10 @@ namespace DNMPWindowsClient.PacketParser
             PayloadPacket = new DummyPacket(stream);
         }
 
-        internal static IPv4Packet Parse(byte[] bytes)
+        internal static IpV4Packet Parse(byte[] bytes)
         {
             var stream = new MemoryStream(bytes);
-            return new IPv4Packet(stream);
+            return new IpV4Packet(stream);
         }
 
         public byte[] Payload => PayloadPacket.ToBytes();

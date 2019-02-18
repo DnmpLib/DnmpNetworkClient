@@ -11,9 +11,10 @@ namespace DNMPWindowsClient.PacketParser
     {
         internal enum OperationType : ushort
         {
-            Request = 0x0001,
-            Response = 0x0002
+            Request = 0x0100,
+            Response = 0x0200
         }
+
         internal ushort HardwareType;
         internal ushort ProtocolType;
         internal byte HardwareLength;
@@ -57,8 +58,8 @@ namespace DNMPWindowsClient.PacketParser
             var writer = new BinaryWriter(streamTo);
             writer.Write(HardwareType);
             writer.Write(ProtocolType);
-            writer.Write(HardwareLength);
-            writer.Write(ProtocolLength);
+            writer.Write((byte)SenderHardwareAddress.Length);
+            writer.Write((byte)SenderProtocolAddress.Length);
             writer.Write((ushort) Operation);
             writer.Write(SenderHardwareAddress);
             writer.Write(SenderProtocolAddress);

@@ -12,8 +12,8 @@ namespace DNMPWindowsClient.PacketParser
     {
         public enum PacketType : ushort
         {
-            IpV4 = 0x0800,
-            Arp = 0x0806
+            IpV4 = 0x0008,
+            Arp = 0x0608
         }
 
         internal PhysicalAddress DestinationAddress;
@@ -30,8 +30,10 @@ namespace DNMPWindowsClient.PacketParser
             switch (Type)
             {
                 case PacketType.Arp:
+                    PayloadPacket = new ArpPacket(packetStream);
                     break;
                 case PacketType.IpV4:
+                    PayloadPacket = new IpV4Packet(packetStream);
                     break;
                 default:
                     PayloadPacket = new DummyPacket(packetStream);
@@ -39,12 +41,12 @@ namespace DNMPWindowsClient.PacketParser
             }
         }
 
-        internal EthernetPacket(PhysicalAddress sourceAddress, PhysicalAddress destinationAddress,
-            IPacket payloadPacket)
+        internal EthernetPacket(PhysicalAddress sourceAddress, PhysicalAddress destinationAddress, IPacket payloadPacket, PacketType packetType)
         {
             SourceAddress = sourceAddress;
             DestinationAddress = destinationAddress;
             PayloadPacket = payloadPacket;
+            Type = packetType;
         }
 
         internal static EthernetPacket Parse(byte[] bytes)

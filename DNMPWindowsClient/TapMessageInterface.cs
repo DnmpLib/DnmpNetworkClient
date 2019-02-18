@@ -139,12 +139,12 @@ namespace DNMPWindowsClient
             if (!initialized)
                 return;
 
-            var ipv4Packet = IPv4Packet.Parse(eventArgs.Data);
+            var ipv4Packet = IpV4Packet.Parse(eventArgs.Data);
             ipv4Packet.SourceAddress = GetIpFromPhysicalAddress(GetPhysicalAddressFromId(eventArgs.SourceId));
             ipv4Packet.DestinationAddress = IPAddress.Broadcast;
 
             var ethernetPacket = new EthernetPacket(GetPhysicalAddressFromId(eventArgs.SourceId),
-                new PhysicalAddress(new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}), ipv4Packet);
+                new PhysicalAddress(new byte[] {0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF}), ipv4Packet, EthernetPacket.PacketType.IpV4);
 
             if (!eventArgs.IsBroadcast)
             {
@@ -202,9 +202,12 @@ namespace DNMPWindowsClient
                                 TargetHardwareAddress = arpPacket.SenderHardwareAddress,
                                 TargetProtocolAddress = arpPacket.SenderProtocolAddress,
                                 SenderHardwareAddress = GetPhysicalAddressFromIp(targetIp).GetAddressBytes(),
-                                SenderProtocolAddress = arpPacket.TargetProtocolAddress
+                                SenderProtocolAddress = arpPacket.TargetProtocolAddress,
+                                Operation = ArpPacket.OperationType.Response,
+                                HardwareType = 0x0100,
+                                ProtocolType = 0x0008
                             };
-                            var answerEthernetPacket = new EthernetPacket(GetPhysicalAddressFromIp(targetIp), new PhysicalAddress(arpPacket.SenderHardwareAddress), answerArpPacket);
+                            var answerEthernetPacket = new EthernetPacket(GetPhysicalAddressFromIp(targetIp), new PhysicalAddress(arpPacket.SenderHardwareAddress), answerArpPacket, EthernetPacket.PacketType.Arp);
                             var answerData = answerEthernetPacket.ToBytes();
                             await tapStream.WriteAsync(answerData, 0, answerData.Length, cancellationToken);
                             break;

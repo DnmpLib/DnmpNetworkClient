@@ -226,8 +226,8 @@ namespace DNMPWindowsClient
                 }
             }
 
-            var visualizationConnectThread = new Thread(VisualizationThreadVoid);
-            visualizationConnectThread.Start();
+            //var visualizationConnectThread = new Thread(VisualizationThreadVoid);
+            //visualizationConnectThread.Start();
 
             running = true;
 

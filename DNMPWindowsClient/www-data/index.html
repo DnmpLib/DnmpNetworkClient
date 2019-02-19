@@ -16,7 +16,10 @@
                 <button class="sidebar-button" data-content-id="networks"><i class="fas fa-network-wired"></i> Сети</button>
                 <!--<button class="sidebar-button" data-content-id="control"><i class="fas fa-sliders-h"></i> Управление</button>-->
                 <button class="sidebar-button" data-content-id="client-settings"><i class="fas fa-wrench"></i> Настройки клиента</button>
-                <div></div>
+                <div id="dev-mode-checkbox-block">
+	                <input type="checkbox" id="dev-mode">
+	                <label for="dev-mode">Режим разработчика</label>
+            	</div>
             </div>
             <div class="content-main">
                 <div class="content-part" id="content-part-status">
@@ -28,15 +31,15 @@
                         <table class="table table-hover" id="clients-table">
                             <tr>
                                 <th>ID</th>
-                                <th>ID предка</th>
-                                <th>Удалённый IP:Порт</th>
+                                <th class="dev-mode">ID предка</th>
+                                <th class="dev-mode">Удалённый IP:Порт</th>
                                 <th>Внутренний IP</th>
                                 <th>Прямое соединение</th>
                                 <th>Задержка</th>
                                 <th>Байт принято</th>
                                 <th>Байт передано</th>
-                                <th>Байт данных принято</th>
-                                <th>Байт данных передано</th>
+                                <th class="dev-mode">Байт данных принято</th>
+                                <th class="dev-mode">Байт данных передано</th>
                             </tr>
                         </table>
                     </div>
@@ -73,10 +76,10 @@
                         </tr>
                     </table>
                 </div>
-                <div class="content-part" id="content-part-control">
+                <!--<div class="content-part" id="content-part-control">
                     <h2>Управление</h2>
                     <hr>
-                    <!--<div class="row">
+                    <div class="row">
                         <div class="col-4">
                             <div class="form-group">
                                 <label for="connect-ip">IP</label>
@@ -94,14 +97,13 @@
                             <button type="submit" class="btn btn-success" id="connect-first-button">Запустить</button>
                             <button type="submit" class="btn btn-danger" id="disconnect-button">Отключится</button>
                         </div>
-                    </div>-->
-                </div>
+                    </div>
+                </div>-->
                 <div class="content-part" id="content-part-client-settings">
                     <h2>Настройки клиента</h2>
                     <span class="text-danger">Изменяйте настройки на свой страх и риск, т.к. после изменения запуск может быть невозможен!</span>
                     <hr>
                     <div id="client-settings-list">
-
                     </div>
                     <button class="btn btn-primary" id="save-client-config">Сохранить настройки клиента</button>
                 </div>

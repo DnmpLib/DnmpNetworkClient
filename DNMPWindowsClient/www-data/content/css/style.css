@@ -139,3 +139,15 @@
 .modal-dialog {
 	min-width: 800px;
 }
+
+#dev-mode-checkbox-block {
+	position: absolute; 
+	bottom: 0; 
+	left: 0; 
+	right: 0; 
+	text-align: center;
+}
+
+.hand-cursor {
+	cursor: hand;
+}

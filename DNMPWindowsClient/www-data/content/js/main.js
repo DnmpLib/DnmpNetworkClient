@@ -122,10 +122,10 @@ function updateClientRow(id, data) {
 				$('<td>').attr('id', 'connected-client-' + id + '-id')
 				.text(data.id)
 			).append(
-				$('<td>').attr('id', 'connected-client-' + id + '-parent-id')
+				$('<td>').attr('id', 'connected-client-' + id + '-parent-id').attr('class', 'dev-mode')
 				.text(data.parentId == 65535 ? "-" : data.parentId)
 			).append(
-				$('<td>').attr('id', 'connected-client-' + id + '-public-ipport')
+				$('<td>').attr('id', 'connected-client-' + id + '-public-ipport').attr('class', 'dev-mode')
 				.text(data.publicIpPort)
 			).append(
 				$('<td>').attr('id', 'connected-client-' + id + '-internal-ip')
@@ -143,15 +143,16 @@ function updateClientRow(id, data) {
 				$('<td>').attr('id', 'connected-client-' + id + '-bytes-sent')
 				.text(data.id == window.clientStorage.selfId ? "-" : data.bytesSent)
 			).append(
-				$('<td>').attr('id', 'connected-client-' + id + '-data-bytes-received')
+				$('<td>').attr('id', 'connected-client-' + id + '-data-bytes-received').attr('class', 'dev-mode')
 				.text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesReceived)
 			).append(
-				$('<td>').attr('id', 'connected-client-' + id + '-data-bytes-sent')
+				$('<td>').attr('id', 'connected-client-' + id + '-data-bytes-sent').attr('class', 'dev-mode')
 				.text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesSent)
 			).attr('class', id == window.clientStorage.selfId ? 'self-client-row' : '')
 			.attr('id', 'connected-client-' + id)
 		);
 		$('#clients-count').text($('#clients-table-content tr').length - 1);
+		updateDevModeElements();
 	} else {
 		$('#connected-client-' + id + '-id').text(data.id);
 		$('#connected-client-' + id + '-parent-id').text(data.parentId == 65535 ? "-" : data.parentId);
@@ -164,6 +165,13 @@ function updateClientRow(id, data) {
 		$('#connected-client-' + id + '-data-bytes-received').text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesReceived);
 		$('#connected-client-' + id + '-data-bytes-sent').text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesSent);
 	}
+}
+
+function updateDevModeElements() {
+	if ($('#dev-mode')[0].checked)
+		$('.dev-mode').show();
+	else
+		$('.dev-mode').hide();
 }
 
 function updateNetworkRow(data) {
@@ -535,6 +543,10 @@ jQuery(document).ready(function($) {
 			}
 		}));
 	});
+
+	$('#dev-mode').click(updateDevModeElements);
+
+	updateDevModeElements();
 
 	$.post('/api/getwebsocket', JSON.stringify({}), function(data) {
 		window.clientStorage.webSocketAddress = data.address;

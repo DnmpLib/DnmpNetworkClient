@@ -12,7 +12,7 @@ script:
   - makensis NSIS/script.nsi
   - mkdir output
   - cp NSIS/setup.exe output/DNMPWindowsClient.Any.Setup.exe
-  - zip -r output/DNMPWindowsClient.Any.zip /DNMPWindowsClient/bin/Release/*
+  - zip -r output/DNMPWindowsClient.Any.zip DNMPWindowsClient/bin/Release
 deploy:
   provider: releases
   api_key:

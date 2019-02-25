@@ -100,6 +100,7 @@ Section "MainSection" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite try
   File /r "..\DNMPWindowsClient\bin\Release\"
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\DNMP Client.lnk" "$INSTDIR\DNMPWindowsClient.exe"
   CreateShortCut "$DESKTOP\DNMP Client.lnk" "$INSTDIR\DNMPWindowsClient.exe"
@@ -108,7 +109,7 @@ SectionEnd
 
 Section -AdditionalIcons
   SetOutPath $INSTDIR
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Application removal
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd

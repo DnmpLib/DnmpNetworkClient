@@ -1,2 +1,9 @@
 language: csharp
 solution: DNMPWindowsClient.sln
+install:
+  - nuget restore DNMPWindowsClient.sln
+  - nuget install NUnit.Console -Version 3.9.0 -OutputDirectory testrunner
+  - apt install nsis
+script:
+  - msbuild /p:Configuration=Release DNMPWindowsClient.sln
+  - makensis NSIS/script.nsis

@@ -3,9 +3,22 @@ solution: DNMPWindowsClient.sln
 before_install:
   - sudo apt-get update
   - sudo apt-get install -y nsis
+  - sudo apt-get install zip
 install:
   - nuget restore DNMPWindowsClient.sln
   - nuget install NUnit.Console -Version 3.9.0 -OutputDirectory testrunner
 script:
   - msbuild /p:Configuration=Release DNMPWindowsClient.sln
   - makensis NSIS/script.nsi
+  - mkdir output
+  - cp NSIS/setup.exe output/DNMPWindowsClient.Any.Setup.exe
+  - zip -r output/DNMPWindowsClient.Any.zip /DNMPWindowsClient/bin/Release/*
+deploy:
+  provider: releases
+  api_key:
+    secure: fG1ig4nlp/y7TzdJZy8ePp4FmKP2CZ0/4La1++GUqCfK5NMs5qoFud28l8VSR0Tga1oBAXpvHqQbu60IiA6ojxl3SouVBaRDWrOHpqQho7vGBBSQEaLwBVaXP9JY0xXpsRe7fsoi8vj7fLaD8rBFXeYj4PfbdcDg1EeWvDZgjuO6vCeqdXaIUX3sW8b2n9H0ZzYDhEqkYWBjGzCN6379soPyak0siANo1VvSOt14ZxUDBpueIpFeTcfvBG/XMz/MI9+ABg3ZfQLKt2gKMzjLUq5IhSgqVWqE1q+rEfi+MYEFLT5NWziHxJ0P1h0uwGD9s0E5C30i1/13K+7Q1CWccQWhiY7K2DJ3ygovaoEOHcShSvb4kCvUbqvv26y4pez3+GdKoKq2XuVptdVUdCglFYDwTGmY7yeBL2vnklEfOaFDgL7JkcyMj3Rs7SeGrW5PWHEpq5DDyzob+OJac1VUTpDYcxGSCDtZQEQTw45OnLiPW5T0R6ZeWhwv0W8j7x360VCLP1gZd2bj1nGX9Ae/OAJsmb8hwbfR/y7A2XP9vOP/7k4MKY7NZ5XH+lpfgZaRqDi6hhRDavEeB95LqyYEKhxYqrlwQ2g58Z6YEhG2F8VYAHm/hS+b47LODJhXtuMJbYq58eGaAF2dLAyRG5OweO5iKbtvPmxO1FLLwfSGNZ8=
+  file: 
+    - "output/DNMPWindowsClient.Any.Setup.exe"
+    - "output/DNMPWindowsClient.Any.zip"
+  skip_cleanup: true
+  draft: true

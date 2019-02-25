@@ -109,7 +109,7 @@ SectionEnd
 
 Section -AdditionalIcons
   SetOutPath $INSTDIR
-  !insertmacro MUI_STARTMENU_WRITE_BEGIN "Application removal"
+  !insertmacro MUI_STARTMENU_WRITE_BEGIN Removal
   CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Uninstall.lnk" "$INSTDIR\uninst.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd

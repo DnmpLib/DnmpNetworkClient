@@ -58,7 +58,7 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "setup.exe"
+OutFile "DNMPWindowsClient.Setup.Any.exe"
 InstallDir "$PROGRAMFILES64\DNMP Client"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show

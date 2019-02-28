@@ -29,7 +29,7 @@ deploy:
   release: last-appveyor
   description: Last appveyor build
   auth_token:
-    secure: IJiqMEroifJ6u9uR0ahiimSiHLIJqLGsi5b6HRERPjiCBBvvqv29fZzkf7aNwqLu
+    secure: 0VGMXYFZ/k9Ke2OXZ2bVkHWfDX9vx3gCXmCjl4QpkzlGd2LDE6CZwMbunD0tjl+H
   artifact: main-binaries
   draft: true
   force_update: true

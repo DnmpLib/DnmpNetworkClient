@@ -1,0 +1,37 @@
+version: 1.0.{build}
+image: Visual Studio 2017
+configuration: Release
+before_build:
+- cmd: >-
+    git submodule update --init --recursive
+
+    nuget restore
+
+    choco install nsis -pre
+build:
+  project: DNMPWindowsClient.sln
+  verbosity: normal
+after_build:
+- cmd: >-
+    makensis NSIS/script.nsi
+
+    mkdir output
+
+    cp NSIS/DNMPWindowsClient.Setup.Any.exe output/DNMPWindowsClient.Setup.Any.exe
+
+    7z a output/DNMPWindowsClient.Any.zip DNMPWindowsClient/bin/Release/*
+artifacts:
+- path: output\*
+  name: main-binaries
+deploy:
+- provider: GitHub
+  tag: last-appveyor
+  release: last-appveyor
+  description: Last appveyor build
+  auth_token:
+    secure: IJiqMEroifJ6u9uR0ahiimSiHLIJqLGsi5b6HRERPjiCBBvvqv29fZzkf7aNwqLu
+  artifact: main-binaries
+  draft: true
+  force_update: true
+  on:
+    branch: master

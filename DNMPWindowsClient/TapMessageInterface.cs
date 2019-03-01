@@ -31,6 +31,8 @@ namespace DNMPWindowsClient
 
         private CancellationTokenSource cancellationTokenSource;
 
+        private const int ipMacPoolShift = 2;
+
         public TapMessageInterface(string tapIpPrefixString, string tapMacPrefixString)
         {
             tapIpPrefix = tapIpPrefixString.Split('.').Select(byte.Parse).ToArray();
@@ -41,7 +43,7 @@ namespace DNMPWindowsClient
 
         public PhysicalAddress GetPhysicalAddressFromIp(IPAddress ip)
         {
-            return ip.GetAddressBytes()[2] * 256 + ip.GetAddressBytes()[3] == selfId + 1 ? 
+            return ip.GetAddressBytes()[2] * 256 + ip.GetAddressBytes()[3] == selfId + ipMacPoolShift ? 
                 tapNetworkInterface.GetPhysicalAddress() : 
                 new PhysicalAddress(new [] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], ip.GetAddressBytes()[2], ip.GetAddressBytes()[3] });
         }
@@ -49,27 +51,27 @@ namespace DNMPWindowsClient
         public IPAddress GetIpFromPhysicalAddress(PhysicalAddress mac)
         {
             return Equals(mac, tapNetworkInterface.GetPhysicalAddress()) ? 
-                new IPAddress(new [] { tapIpPrefix[0], tapIpPrefix[1], (byte)((selfId + 1) / 256), (byte)((selfId + 1) % 256) }) : 
+                new IPAddress(new [] { tapIpPrefix[0], tapIpPrefix[1], (byte)((selfId + ipMacPoolShift) / 256), (byte)((selfId + ipMacPoolShift) % 256) }) : 
                 new IPAddress(new [] { tapIpPrefix[0], tapIpPrefix[1], mac.GetAddressBytes()[4], mac.GetAddressBytes()[5] });
         }
 
         public IPAddress GetIpFromId(ushort id)
         {
-            return new IPAddress(new[] { tapIpPrefix[0], tapIpPrefix[1], (byte)((id + 1) / 256), (byte)((id + 1) % 256) });
+            return new IPAddress(new[] { tapIpPrefix[0], tapIpPrefix[1], (byte)((id + ipMacPoolShift) / 256), (byte)((id + ipMacPoolShift) % 256) });
         }
 
         public ushort GetIdFromPhysicalAddress(PhysicalAddress mac)
         {
             return Equals(mac, tapNetworkInterface.GetPhysicalAddress())
                 ? selfId
-                : (ushort)(mac.GetAddressBytes()[4] * 256 + mac.GetAddressBytes()[5] - 1);
+                : (ushort)(mac.GetAddressBytes()[4] * 256 + mac.GetAddressBytes()[5] - ipMacPoolShift);
         }
 
         public PhysicalAddress GetPhysicalAddressFromId(ushort id)
         {
             return id == selfId ?
                 tapNetworkInterface.GetPhysicalAddress() :
-                new PhysicalAddress(new [] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], (byte)((id + 1) / 256), (byte)((id + 1) % 256) });
+                new PhysicalAddress(new[] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], (byte)((id + ipMacPoolShift) / 256), (byte)((id + ipMacPoolShift) % 256) });
         }
 
         public override async void Initialize(ushort newSelfId)
@@ -150,7 +152,7 @@ namespace DNMPWindowsClient
 
         public override ushort GetMaxClientCount()
         {
-            return 0xFFFD;
+            return 0xFFFC;
         }
 
         private const string usermodeDeviceSpace = "\\\\.\\Global\\";
@@ -169,6 +171,8 @@ namespace DNMPWindowsClient
                     var p = EthernetPacket.Parse(buffer.Take(readBytes).ToArray());
                     if (p.DestinationAddress.GetAddressBytes().Take(3).SequenceEqual(new byte[] {0x01, 0x00, 0x5E}))
                         continue;
+                    // TODO check for wrong MAC/IP
+                    // TODO DHCP/DNS on x.x.0.1
                     // ReSharper disable once SwitchStatementMissingSomeCases
                     switch (p.Type)
                     {

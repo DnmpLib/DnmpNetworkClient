@@ -13,6 +13,7 @@ using System.Net.NetworkInformation;
 using System.Security.Principal;
 using System.Threading;
 using DNMPLibrary.Client;
+using DNMPLibrary.Interaction.MessageInterface;
 using DNMPWindowsClient.PacketParser;
 using NLog;
 
@@ -26,22 +27,14 @@ namespace DNMPWindowsClient
 
         private NetworkInterface tapNetworkInterface;
 
-        private byte[] tapIpPrefix;
-        private byte[] tapMacPrefix;
+        private readonly byte[] tapIpPrefix;
+        private readonly byte[] tapMacPrefix;
 
         private bool initialized;
 
         private CancellationTokenSource cancellationTokenSource;
 
         public TapMessageInterface(string tapIpPrefixString, string tapMacPrefixString)
-        {
-            tapIpPrefix = tapIpPrefixString.Split('.').Select(byte.Parse).ToArray();
-            tapMacPrefix = tapMacPrefixString.Split(':').Select(x => Convert.ToByte(x, 16)).ToArray();
-            if (tapIpPrefix.Length < 2 || tapMacPrefix.Length < 4)
-                throw new Exception("Wrong IP/MAC format for TAP");
-        }
-
-        public void SetIpMacPrefixes(string tapIpPrefixString, string tapMacPrefixString)
         {
             tapIpPrefix = tapIpPrefixString.Split('.').Select(byte.Parse).ToArray();
             tapMacPrefix = tapMacPrefixString.Split(':').Select(x => Convert.ToByte(x, 16)).ToArray();

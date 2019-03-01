@@ -11,7 +11,6 @@ namespace DNMPWindowsClient.PacketParser
     {
         internal enum OperationType : ushort
         {
-            Request = 0x0100,
             Response = 0x0200
         }
 

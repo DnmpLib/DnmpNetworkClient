@@ -4,7 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography;
+using DNMPLibrary.Interaction.Protocol;
+using DNMPLibrary.Interaction.Protocol.EndPointFactoryImpl;
+using DNMPLibrary.Interaction.Protocol.EndPointImpl;
 using DNMPLibrary.Security;
+using DNMPLibrary.Security.Cryptography.Asymmetric;
+using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
 using DNMPLibrary.Util;
 using Newtonsoft.Json;
 
@@ -61,9 +66,9 @@ namespace DNMPWindowsClient
                 return memoryStream.ToArray();
             }
 
-            public Tuple<IEnumerable<EndPoint>, IAsymmetricKey> GetConnectionData()
+            public Tuple<IEnumerable<IEndPoint>, IAsymmetricKey> GetConnectionData()
             {
-                return new Tuple<IEnumerable<EndPoint>, IAsymmetricKey>(SavedIpEndPoints.Select(x => EndPointSerializer.FromBytes(Convert.FromBase64String(x.Key))), new RSAAsymmetricKey
+                return new Tuple<IEnumerable<IEndPoint>, IAsymmetricKey>(SavedIpEndPoints.Select(x => new RealIPEndPointFactory().DeserializeEndPoint(Convert.FromBase64String(x.Key))), new RSAAsymmetricKey
                 {
                     KeyParameters = Key
                 });
@@ -93,9 +98,9 @@ namespace DNMPWindowsClient
             }
         }
 
-        public void AddEndPoint(Guid networkId, EndPoint endPoint)
+        public void AddEndPoint(Guid networkId, RealIPEndPoint endPoint)
         {
-            savedNetworks[networkId].SavedIpEndPoints[Convert.ToBase64String(EndPointSerializer.ToBytes(endPoint))] = DateTime.Now;
+            savedNetworks[networkId].SavedIpEndPoints[Convert.ToBase64String(new RealIPEndPointFactory().SerializeEndPoint(endPoint))] = DateTime.Now;
         }
 
         public Guid AddNetwork(string name, byte[] keyBytes)

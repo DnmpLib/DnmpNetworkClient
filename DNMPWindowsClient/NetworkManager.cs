@@ -2,15 +2,12 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography;
 using DNMPLibrary.Interaction.Protocol;
 using DNMPLibrary.Interaction.Protocol.EndPointFactoryImpl;
 using DNMPLibrary.Interaction.Protocol.EndPointImpl;
-using DNMPLibrary.Security;
 using DNMPLibrary.Security.Cryptography.Asymmetric;
 using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
-using DNMPLibrary.Util;
 using Newtonsoft.Json;
 
 namespace DNMPWindowsClient

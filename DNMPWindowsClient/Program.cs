@@ -13,10 +13,8 @@ using System.Threading;
 using System.Windows.Forms;
 using DNMPLibrary.Client;
 using DNMPLibrary.Core;
-using DNMPLibrary.Interaction.Protocol;
 using DNMPLibrary.Interaction.Protocol.EndPointImpl;
 using DNMPLibrary.Interaction.Protocol.ProtocolImpl;
-using DNMPLibrary.Security;
 using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
 using DNMPLibrary.Security.Cryptography.Symmetric.Impl;
 using DNMPLibrary.Util;
@@ -29,7 +27,6 @@ using uhttpsharp.RequestProviders;
 using uhttpsharp.Listeners;
 using StackExchange.NetGain;
 using StackExchange.NetGain.WebSockets;
-using TcpClient = StackExchange.NetGain.TcpClient;
 using Timer = System.Threading.Timer;
 
 namespace DNMPWindowsClient

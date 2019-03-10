@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.IO;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -11,7 +6,6 @@ namespace DNMPWindowsClient.PacketParser
     {
         internal enum OperationType : ushort
         {
-            Request = 0x0100,
             Response = 0x0200
         }
 

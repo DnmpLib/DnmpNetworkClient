@@ -12,7 +12,11 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
 using DNMPLibrary.Client;
-using DNMPLibrary.Security;
+using DNMPLibrary.Core;
+using DNMPLibrary.Interaction.Protocol.EndPointImpl;
+using DNMPLibrary.Interaction.Protocol.ProtocolImpl;
+using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
+using DNMPLibrary.Security.Cryptography.Symmetric.Impl;
 using DNMPLibrary.Util;
 using Newtonsoft.Json.Linq;
 using NLog;
@@ -23,7 +27,6 @@ using uhttpsharp.RequestProviders;
 using uhttpsharp.Listeners;
 using StackExchange.NetGain;
 using StackExchange.NetGain.WebSockets;
-using TcpClient = StackExchange.NetGain.TcpClient;
 using Timer = System.Threading.Timer;
 
 namespace DNMPWindowsClient
@@ -42,7 +45,7 @@ namespace DNMPWindowsClient
 
         private static TapMessageInterface tapMessageInterface;
 
-        private static RealClient dnmpClient;
+        private static DNMPClient dnmpClient;
 
         private static readonly Random random = new Random();
 
@@ -96,7 +99,7 @@ namespace DNMPWindowsClient
             [JsonProperty(PropertyName = "ping")]
             public int Ping;
 
-            public ClientJsonData(DNMPClient client)
+            public ClientJsonData(DNMPNode client)
             {
                 Id = client.Id;
                 ParentId = client.ParentId;
@@ -182,26 +185,7 @@ namespace DNMPWindowsClient
 
             Application.Run();
         }
-
-        private static TcpClient visualizationClient;
-
-        private static void VisualizationThreadVoid(object _)
-        {
-            try
-            {
-                visualizationClient = new TcpClient();
-                logger.Debug($"Connecting to visualization server {new IPEndPoint(IPAddress.Parse(config.VisualizationConfig.ServerIp), config.VisualizationConfig.ServerPort)}");
-                visualizationClient.Open(new IPEndPoint(IPAddress.Parse(config.VisualizationConfig.ServerIp),
-                    config.VisualizationConfig.ServerPort));
-                logger.Info($"Connected to visualization server {new IPEndPoint(IPAddress.Parse(config.VisualizationConfig.ServerIp), config.VisualizationConfig.ServerPort)}");
-            }
-            catch (Exception e)
-            {
-                logger.Error(e, "Exception while connecting to visualization server");
-                visualizationClient = null;
-            }
-        }
-
+        
         private static readonly Mutex singleInstanceMutex = new Mutex(true, "{f26f7326-ff1e-4138-ba52-f633fcdef7ab}");
         
         private const string configFile = "config.json";
@@ -245,7 +229,7 @@ namespace DNMPWindowsClient
 
             tapMessageInterface = new TapMessageInterface(config.TapConfig.IpPrefix, config.TapConfig.MacPrefix);
 
-            dnmpClient = new RealClient(tapMessageInterface, config.ClientConfig);
+            dnmpClient = new DNMPClient(tapMessageInterface, new UdpProtocol(), config.ClientConfig);
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -288,11 +272,11 @@ namespace DNMPWindowsClient
                                         {
                                             state = dnmpClient.CurrentStatus,
                                             selfClientId = dnmpClient.SelfClient?.Id ?? 0xFFFF,
-                                            clients = dnmpClient.CurrentStatus == RealClient.ClientStatus.Connected &&
+                                            clients = dnmpClient.CurrentStatus == DNMPClient.ClientStatus.Connected &&
                                                       dnmpClient.SelfClient != null
                                                 ? dnmpClient.ClientsById.Concat(new[]
                                                     {
-                                                        new KeyValuePair<ushort, DNMPClient>(
+                                                        new KeyValuePair<ushort, DNMPNode>(
                                                             dnmpClient.SelfClient.Id, dnmpClient.SelfClient)
                                                     })
                                                     .Select(x => new ClientJsonData(x.Value))
@@ -331,7 +315,7 @@ namespace DNMPWindowsClient
                     eventType = WebGuiEventType.SelfStatusChange,
                     eventData = new
                     {
-                        status = RealClient.ClientStatus.Connected,
+                        status = DNMPClient.ClientStatus.Connected,
                         selfClient = new ClientJsonData(dnmpClient.SelfClient)
                     }
                 }));
@@ -345,7 +329,7 @@ namespace DNMPWindowsClient
                     eventType = WebGuiEventType.SelfStatusChange,
                     eventData = new
                     {
-                        status = RealClient.ClientStatus.NotConnected
+                        status = DNMPClient.ClientStatus.NotConnected
                     }
                 }));
             };
@@ -358,7 +342,7 @@ namespace DNMPWindowsClient
                     eventType = WebGuiEventType.SelfStatusChange,
                     eventData = new
                     {
-                        status = RealClient.ClientStatus.NotConnected
+                        status = DNMPClient.ClientStatus.NotConnected
                     }
                 }));
             };
@@ -367,7 +351,7 @@ namespace DNMPWindowsClient
             {
                 if (clientId == dnmpClient.SelfClient.Id)
                     return;
-                networkManager.AddEndPoint(currentNetworkId, dnmpClient.ClientsById[clientId].EndPoint);
+                networkManager.AddEndPoint(currentNetworkId, (RealIPEndPoint)dnmpClient.ClientsById[clientId].EndPoint);
                 networkManager.SaveNetworks(config.NetworksSaveConfig.SaveFile);
                 webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                 {
@@ -561,7 +545,7 @@ namespace DNMPWindowsClient
                                                 sourcePort);
                                         }
 
-                                        networkManager.AddEndPoint(networkId, stunnedEndPoint);
+                                        networkManager.AddEndPoint(networkId, new RealIPEndPoint((IPEndPoint)stunnedEndPoint));
                                         networkManager.SaveNetworks(config.NetworksSaveConfig.SaveFile);
                                         webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                                         {
@@ -571,17 +555,17 @@ namespace DNMPWindowsClient
                                                 networks = networkManager.SavedNetworks.Values.Select(x => new NetworkJsonData(x))
                                             }
                                         }));
-                                        Task.Run(() => dnmpClient.StartAsFirstNodeAsync(new IPEndPoint(IPAddress.Any, sourcePort), stunnedEndPoint, networkConnectData.Item2, new AESSymmetricKey()));
+                                        Task.Run(() => dnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AESSymmetricKey()));
                                     }
                                     else
-                                        Task.Run(() => dnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new IPEndPoint(IPAddress.Any, sourcePort), true, networkConnectData.Item2, new AESSymmetricKey()));
+                                        Task.Run(() => dnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), true, networkConnectData.Item2, new AESSymmetricKey()));
                                     currentNetworkId = networkId;
                                     webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                                     {
                                         eventType = WebGuiEventType.SelfStatusChange,
                                         eventData = new
                                         {
-                                            status = RealClient.ClientStatus.Connecting
+                                            status = DNMPClient.ClientStatus.Connecting
                                         }
                                     }));
                                     response = new

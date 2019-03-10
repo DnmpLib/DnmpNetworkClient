@@ -96,6 +96,7 @@
     <Compile Include="PacketParser\EthernetPacket.cs" />
     <Compile Include="PacketParser\IPv4Packet.cs" />
     <Compile Include="PacketParser\IPacket.cs" />
+    <Compile Include="PacketParser\UdpPacket.cs" />
     <Compile Include="PortMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

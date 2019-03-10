@@ -4,12 +4,13 @@ using System.Net;
 
 namespace DNMPWindowsClient.PacketParser
 {
-    internal sealed class IpV4Packet : IPacket
+    internal sealed class IPv4Packet : IPacket
     {
         internal enum PacketType : byte
         {
             Udp = 17
         }
+
         internal byte Version;
         private readonly byte internetHeaderLength;
         internal byte TypeOfService;
@@ -25,7 +26,7 @@ namespace DNMPWindowsClient.PacketParser
         internal IPAddress DestinationAddress;
         internal IPacket PayloadPacket;
 
-        internal IpV4Packet(Stream stream)
+        internal IPv4Packet(Stream stream)
         {
             var reader = new BinaryReader(stream);
             var tmpbyte = reader.ReadByte();
@@ -54,10 +55,8 @@ namespace DNMPWindowsClient.PacketParser
                     break;
             }
         }
-
-        //TODO default ttl fix
-        internal IpV4Packet(IPAddress sourceAddress, IPAddress destinationAddress, IPacket payloadPacket,
-            byte timeToLive = 64)
+        
+        internal IPv4Packet(IPAddress sourceAddress, IPAddress destinationAddress, IPacket payloadPacket, byte timeToLive = 64)
         {
             Version = 4;
             internetHeaderLength = 20;
@@ -90,10 +89,10 @@ namespace DNMPWindowsClient.PacketParser
             DestinationAddress = destinationAddress;
         }
 
-        internal static IpV4Packet Parse(byte[] bytes)
+        internal static IPv4Packet Parse(byte[] bytes)
         {
             var stream = new MemoryStream(bytes);
-            return new IpV4Packet(stream);
+            return new IPv4Packet(stream);
         }
 
         public byte[] Payload => PayloadPacket.ToBytes();

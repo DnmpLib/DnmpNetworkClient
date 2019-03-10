@@ -10,7 +10,7 @@ namespace DNMPWindowsClient.PacketParser
 {
     internal class EthernetPacket : IPacket
     {
-        public enum PacketType : ushort
+        internal enum PacketType : ushort
         {
             IpV4 = 0x0008,
             Arp = 0x0608

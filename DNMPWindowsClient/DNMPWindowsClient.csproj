@@ -92,7 +92,7 @@
     <Compile Include="MimeTypeHelper.cs" />
     <Compile Include="NetworkManager.cs" />
     <Compile Include="PacketParser\ArpPacket.cs" />
-    <Compile Include="PacketParser\DhcpPacket.cs" />
+    <Compile Include="PacketParser\DHCPPacket.cs" />
     <Compile Include="PacketParser\DummyPacket.cs" />
     <Compile Include="PacketParser\EthernetPacket.cs" />
     <Compile Include="PacketParser\InvalidPacketException.cs" />

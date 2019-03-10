@@ -21,7 +21,7 @@ namespace DNMPWindowsClient.PacketParser
             checksum = reader.ReadInt16();
             if (readAmount < Length) throw new InvalidPacketException();
             if (SourcePort == 67 || SourcePort == 68 || DestinationPort == 67 || DestinationPort == 68)
-                PayloadPacket = new DhcpPacket(stream, Length - 8);
+                PayloadPacket = new DHCPPacket(stream, Length - 8);
             else PayloadPacket = new DummyPacket(stream, Length - 8);
             reader.ReadBytes(readAmount - Length);
         }

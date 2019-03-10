@@ -25,7 +25,7 @@ namespace DNMPWindowsClient.PacketParser
             PayloadPacket = new DummyPacket(stream);
         }
 
-        internal UdpPacket(ushort sourcePort, ushort destinationPort, IPacket payloadPacket, IpV4Packet parent)
+        internal UdpPacket(ushort sourcePort, ushort destinationPort, IPacket payloadPacket, IPv4Packet parent)
         {
             SourcePort = sourcePort;
             DestinationPort = destinationPort;

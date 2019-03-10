@@ -133,7 +133,7 @@ namespace DNMPWindowsClient
             if (!initialized)
                 return;
 
-            var ipv4Packet = IpV4Packet.Parse(eventArgs.Data);
+            var ipv4Packet = IPv4Packet.Parse(eventArgs.Data);
             ipv4Packet.SourceAddress = GetIpFromPhysicalAddress(GetPhysicalAddressFromId(eventArgs.SourceId));
             ipv4Packet.DestinationAddress = IPAddress.Broadcast;
 

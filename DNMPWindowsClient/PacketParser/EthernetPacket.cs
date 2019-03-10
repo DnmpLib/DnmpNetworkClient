@@ -28,7 +28,7 @@ namespace DNMPWindowsClient.PacketParser
                     PayloadPacket = new ArpPacket(packetStream);
                     break;
                 case PacketType.IpV4:
-                    PayloadPacket = new IpV4Packet(packetStream);
+                    PayloadPacket = new IPv4Packet(packetStream);
                     break;
                 default:
                     PayloadPacket = new DummyPacket(packetStream);

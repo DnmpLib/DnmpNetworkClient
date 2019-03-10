@@ -89,11 +89,7 @@ namespace DNMPWindowsClient.PacketParser
             DestinationAddress = destinationAddress;
         }
 
-        internal static IPv4Packet Parse(byte[] bytes)
-        {
-            var stream = new MemoryStream(bytes);
-            return new IPv4Packet(stream);
-        }
+        internal static IPv4Packet Parse(byte[] bytes) => new IPv4Packet(new MemoryStream(bytes));
 
         public byte[] Payload => PayloadPacket.ToBytes();
 

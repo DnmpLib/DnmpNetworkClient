@@ -34,20 +34,14 @@ namespace DNMPWindowsClient.PacketParser
             var payload = ToBytes();
             var sum = 0;
             for (var i = 0; i < payload.Length / 2; i++)
-            {
                 sum += BitConverter.ToUInt16(payload, i * 2);
-            }
             sum += BitConverter.ToInt32(parent.SourceAddress.GetAddressBytes(), 0);
             sum += BitConverter.ToInt32(parent.DestinationAddress.GetAddressBytes(), 0);
             sum += Length;
             checksum = (short)(sum >> 16 + sum << 16 >> 16);
         }
 
-        internal static UdpPacket Parse(byte[] bytes)
-        {
-            var stream = new MemoryStream(bytes);
-            return new UdpPacket(stream);
-        }
+        internal static UdpPacket Parse(byte[] bytes) => new UdpPacket(new MemoryStream(bytes));
 
         public byte[] Payload => PayloadPacket.ToBytes();
 

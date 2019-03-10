@@ -60,11 +60,13 @@ namespace DNMPWindowsClient
             return new IPAddress(new[] { tapIpPrefix[0], tapIpPrefix[1], (byte)((id + ipMacPoolShift) / 256), (byte)((id + ipMacPoolShift) % 256) });
         }
 
-        public ushort GetIdFromPhysicalAddress(PhysicalAddress mac)
+        public int GetIdFromPhysicalAddress(PhysicalAddress mac)
         {
+            if (!mac.GetAddressBytes().Take(4).SequenceEqual(tapMacPrefix))
+                return -ipMacPoolShift;
             return Equals(mac, tapNetworkInterface.GetPhysicalAddress())
                 ? selfId
-                : (ushort)(mac.GetAddressBytes()[4] * 256 + mac.GetAddressBytes()[5] - ipMacPoolShift);
+                : mac.GetAddressBytes()[4] * 256 + mac.GetAddressBytes()[5] - ipMacPoolShift;
         }
 
         public PhysicalAddress GetPhysicalAddressFromId(ushort id)
@@ -171,13 +173,23 @@ namespace DNMPWindowsClient
                     var p = EthernetPacket.Parse(buffer.Take(readBytes).ToArray());
                     if (p.DestinationAddress.GetAddressBytes().Take(3).SequenceEqual(new byte[] {0x01, 0x00, 0x5E}))
                         continue;
-                    // TODO check for wrong MAC/IP
-                    // TODO DHCP/DNS on x.x.0.1
                     // ReSharper disable once SwitchStatementMissingSomeCases
                     switch (p.Type)
                     {
                         case EthernetPacket.PacketType.IpV4:
-                            var id = GetIdFromPhysicalAddress(p.DestinationAddress);
+                            var intId = GetIdFromPhysicalAddress(p.DestinationAddress);
+                            if (intId < 0)
+                            {
+                                switch (intId) {
+                                    case -ipMacPoolShift:
+                                        continue;
+                                    case -1:
+                                        //TODO DHCP/DNS
+
+                                        break;
+                                }
+                            }
+                            var id = (ushort)intId;
                             if (id == 0xFFFE)
                                 await Broadcast(p.Payload);
                             if (HostExists(id) || id == selfId)
@@ -186,8 +198,12 @@ namespace DNMPWindowsClient
                         case EthernetPacket.PacketType.Arp:
                             var arpPacket = (ArpPacket) p.PayloadPacket;
                             var targetIp = new IPAddress(arpPacket.TargetProtocolAddress);
+                            if (!targetIp.GetAddressBytes().Take(2).SequenceEqual(tapIpPrefix))
+                                continue;
                             var targetId = GetIdFromPhysicalAddress(GetPhysicalAddressFromIp(targetIp));
-                            if (!HostExists(targetId))
+                            if (targetId == -ipMacPoolShift)
+                                continue;
+                            if (!HostExists((ushort)targetId))
                                 break;
                             var answerArpPacket = new ArpPacket
                             {

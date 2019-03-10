@@ -16,8 +16,9 @@ namespace DNMPWindowsClient.PacketParser
         internal PacketType Type;
         internal IPacket PayloadPacket;
 
-        internal EthernetPacket(Stream packetStream)
+        internal EthernetPacket(Stream packetStream, int readAmount = int.MaxValue)
         {
+            if (readAmount < 14) throw new InvalidPacketException();
             var reader = new BinaryReader(packetStream);
             DestinationAddress = new PhysicalAddress(reader.ReadBytes(6));
             SourceAddress = new PhysicalAddress(reader.ReadBytes(6));
@@ -25,13 +26,13 @@ namespace DNMPWindowsClient.PacketParser
             switch (Type)
             {
                 case PacketType.Arp:
-                    PayloadPacket = new ArpPacket(packetStream);
+                    PayloadPacket = new ArpPacket(packetStream, readAmount - 14);
                     break;
                 case PacketType.IpV4:
-                    PayloadPacket = new IPv4Packet(packetStream);
+                    PayloadPacket = new IPv4Packet(packetStream, readAmount - 14);
                     break;
                 default:
-                    PayloadPacket = new DummyPacket(packetStream);
+                    PayloadPacket = new DummyPacket(packetStream, readAmount - 14);
                     break;
             }
         }

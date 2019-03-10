@@ -4,6 +4,7 @@ using System.Net;
 
 namespace DNMPWindowsClient.PacketParser
 {
+    // ReSharper disable once InconsistentNaming
     internal sealed class IPv4Packet : IPacket
     {
         internal enum PacketType : byte
@@ -26,8 +27,9 @@ namespace DNMPWindowsClient.PacketParser
         internal IPAddress DestinationAddress;
         internal IPacket PayloadPacket;
 
-        internal IPv4Packet(Stream stream)
+        internal IPv4Packet(Stream stream, int readAmount = int.MaxValue)
         {
+            if (readAmount < 20) throw new InvalidPacketException();
             var reader = new BinaryReader(stream);
             var tmpbyte = reader.ReadByte();
             Version = (byte)(tmpbyte >> 4);
@@ -45,15 +47,17 @@ namespace DNMPWindowsClient.PacketParser
             DestinationAddress = new IPAddress(reader.ReadBytes(4));
             options = reader.ReadBytes(internetHeaderLength - 20);
             reader.ReadBytes((internetHeaderLength + 3) / 4 * 4 - internetHeaderLength);
+            if (readAmount < totalLength) throw new InvalidPacketException();
             switch (Protocol)
             {
                 case PacketType.Udp:
-                    PayloadPacket = new UdpPacket(stream);
+                    PayloadPacket = new UdpPacket(stream, totalLength - (internetHeaderLength + 3) / 4 * 4);
                     break;
                 default:
-                    PayloadPacket = new DummyPacket(stream);
+                    PayloadPacket = new DummyPacket(stream, totalLength - (internetHeaderLength + 3) / 4 * 4);
                     break;
             }
+            reader.ReadBytes(readAmount - totalLength);
         }
         
         internal IPv4Packet(IPAddress sourceAddress, IPAddress destinationAddress, IPacket payloadPacket, byte timeToLive = 64)

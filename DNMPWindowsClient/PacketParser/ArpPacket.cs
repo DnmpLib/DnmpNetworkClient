@@ -19,14 +19,16 @@ namespace DNMPWindowsClient.PacketParser
         internal byte[] TargetHardwareAddress;
         internal byte[] TargetProtocolAddress;
 
-        internal ArpPacket(Stream packetStream)
+        internal ArpPacket(Stream packetStream, int readAmount = int.MaxValue)
         {
+            if (readAmount < 8) throw new InvalidPacketException();
             var reader = new BinaryReader(packetStream);
             HardwareType = reader.ReadUInt16();
             ProtocolType = reader.ReadUInt16();
             HardwareLength = reader.ReadByte();
             ProtocolLength = reader.ReadByte();
             Operation = (OperationType) reader.ReadUInt16();
+            if (readAmount != (HardwareLength + ProtocolLength) * 2 + 8) throw new InvalidPacketException();
             SenderHardwareAddress = reader.ReadBytes(HardwareLength);
             SenderProtocolAddress = reader.ReadBytes(ProtocolLength);
             TargetHardwareAddress = reader.ReadBytes(HardwareLength);

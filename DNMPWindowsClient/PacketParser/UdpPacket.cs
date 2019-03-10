@@ -1,9 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -15,14 +11,19 @@ namespace DNMPWindowsClient.PacketParser
         private readonly short checksum;
         internal IPacket PayloadPacket;
 
-        internal UdpPacket(Stream stream)
+        internal UdpPacket(Stream stream, int readAmount = int.MaxValue)
         {
+            if (readAmount < 8) throw new InvalidPacketException();
             var reader = new BinaryReader(stream);
             SourcePort = reader.ReadUInt16();
             DestinationPort = reader.ReadUInt16();
             Length = reader.ReadUInt16();
             checksum = reader.ReadInt16();
-            PayloadPacket = new DummyPacket(stream);
+            if (readAmount < Length) throw new InvalidPacketException();
+            if (SourcePort == 67 || SourcePort == 68 || DestinationPort == 67 || DestinationPort == 68)
+                PayloadPacket = new DhcpPacket(stream, Length - 8);
+            else PayloadPacket = new DummyPacket(stream, Length - 8);
+            reader.ReadBytes(readAmount - Length);
         }
 
         internal UdpPacket(ushort sourcePort, ushort destinationPort, IPacket payloadPacket, IPv4Packet parent)

@@ -161,9 +161,9 @@ namespace DNMPWindowsClient
                 Text = @"Открыть интерфейс",
             };
 
-            openGuiMenuItem.Click += (o, e) => { Process.Start(new ProcessStartInfo("cmd", $"/c start http://localhost:{config.WebServerConfig.HttpServerPort}") { CreateNoWindow = true, UseShellExecute = false }); };
+            openGuiMenuItem.Click += (o, e) => { Process.Start(new ProcessStartInfo("cmd", $"/c start http://127.0.0.1:{config.WebServerConfig.HttpServerPort}") { CreateNoWindow = true, UseShellExecute = false }); };
             
-            mainNotifyIcon.DoubleClick += (o, e) => { Process.Start(new ProcessStartInfo("cmd", $"/c start http://localhost:{config.WebServerConfig.HttpServerPort}") { CreateNoWindow = true, UseShellExecute = false }); };
+            mainNotifyIcon.DoubleClick += (o, e) => { Process.Start(new ProcessStartInfo("cmd", $"/c start http://127.0.0.1:{config.WebServerConfig.HttpServerPort}") { CreateNoWindow = true, UseShellExecute = false }); };
 
             exitMenuItem.Click += (o, e) =>
             {

@@ -25,7 +25,7 @@ namespace DNMPWindowsClient.PacketParser
         internal PhysicalAddress ClientHardwareAddress;
         internal string ServerHostName;
         internal string BootFileName;
-        internal byte[] Options;
+        internal Dictionary<byte, byte[]> Options;
 
         internal DHCPPacket(Stream stream, int readAmount = int.MaxValue)
         {
@@ -45,13 +45,35 @@ namespace DNMPWindowsClient.PacketParser
             ClientHardwareAddress = new PhysicalAddress(reader.ReadBytes(16).Take(HardwareAddressLength).ToArray());
             ServerHostName = Encoding.ASCII.GetString(reader.ReadBytes(64).TakeWhile(x => x != 0).ToArray());
             BootFileName = Encoding.ASCII.GetString(reader.ReadBytes(128).TakeWhile(x => x != 0).ToArray());
-            Options = reader.ReadBytes(readAmount - 236);
+            readAmount -= 236;
+            if (readAmount < 5) throw new InvalidPacketException();
+            if (reader.ReadByte() != 99 || reader.ReadByte() != 130 || reader.ReadByte() != 83 ||
+                reader.ReadByte() != 99) throw new InvalidPacketException("DHCP Magic cookie invalid");
+            readAmount -= 4;
+            Options = new Dictionary<byte, byte[]>();
+            do
+            {
+                var opType = reader.ReadByte();
+                readAmount--;
+                if (opType == 0xFF)
+                {
+                    reader.ReadBytes(readAmount);
+                    return;
+                }
+                if (readAmount < 1) throw new InvalidPacketException();
+                var length = reader.ReadByte();
+                readAmount--;
+                if (readAmount < length) throw new InvalidPacketException();
+                readAmount -= length;
+                Options.Add(opType, reader.ReadBytes(length));
+            } while (readAmount > 0);
+            throw new InvalidPacketException();
         }
 
         internal DHCPPacket() { }
 
         internal static DHCPPacket Parse(byte[] bytes) => new DHCPPacket(new MemoryStream(bytes));
-        
+
         public byte[] Payload => throw new InvalidOperationException();
 
         public byte[] ToBytes()
@@ -80,7 +102,14 @@ namespace DNMPWindowsClient.PacketParser
             writer.Write(address);
             writer.Write(Encoding.ASCII.GetBytes(ServerHostName.PadRight(64, '\0')));
             writer.Write(Encoding.ASCII.GetBytes(BootFileName.PadRight(128, '\0')));
-            writer.Write(Options);
+            writer.Write(new byte[] { 99, 130, 83, 99});
+            foreach (var option in Options)
+            {
+                writer.Write(option.Key);
+                writer.Write(option.Value.Length);
+                writer.Write(option.Value);
+            }
+            writer.Write(255);
         }
     }
 }

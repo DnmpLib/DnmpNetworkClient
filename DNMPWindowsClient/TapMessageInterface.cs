@@ -184,14 +184,22 @@ namespace DNMPWindowsClient
                                     case -ipMacPoolShift:
                                         continue;
                                     case -1:
-                                        //TODO DHCP/DNS
-
+                                        //TODO DNS
                                         break;
                                 }
                             }
                             var id = (ushort)intId;
                             if (id == 0xFFFE)
+                            {
+                                if (p.PayloadPacket is UdpPacket udpPacket && udpPacket.PayloadPacket is DHCPPacket dhcpPacket)
+                                {
+                                    if (dhcpPacket.Op != 1)
+                                        continue;
+
+                                }
                                 await Broadcast(p.Payload);
+                            }
+
                             if (HostExists(id) || id == selfId)
                                 await Send(p.Payload, id);
                             break;

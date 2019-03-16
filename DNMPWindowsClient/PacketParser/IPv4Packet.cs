@@ -15,17 +15,18 @@ namespace DNMPWindowsClient.PacketParser
         internal byte Version;
         private readonly byte internetHeaderLength;
         internal byte TypeOfService;
-        private readonly ushort totalLength;
+        private ushort totalLength;
         private readonly ushort identification;
         private readonly byte flags;
         private readonly ushort fragmentOffset;
         internal byte TimeToLive;
         internal PacketType Protocol;
-        private readonly ushort headerChecksum;
+        private ushort headerChecksum;
         private readonly byte[] options;
         internal IPAddress SourceAddress;
         internal IPAddress DestinationAddress;
         internal IPacket PayloadPacket;
+        private bool inited;
 
         internal IPv4Packet(Stream stream, int readAmount = int.MaxValue)
         {
@@ -45,8 +46,7 @@ namespace DNMPWindowsClient.PacketParser
             headerChecksum = reader.ReadUInt16();
             SourceAddress = new IPAddress(reader.ReadBytes(4));
             DestinationAddress = new IPAddress(reader.ReadBytes(4));
-            options = reader.ReadBytes(internetHeaderLength - 20);
-            reader.ReadBytes((internetHeaderLength + 3) / 4 * 4 - internetHeaderLength);
+            options = reader.ReadBytes((internetHeaderLength - 5) * 4);
             if (readAmount < totalLength) throw new InvalidPacketException();
             switch (Protocol)
             {
@@ -58,8 +58,48 @@ namespace DNMPWindowsClient.PacketParser
                     break;
             }
             reader.ReadBytes(readAmount - totalLength);
+            inited = true;
         }
-        
+
+        internal IPv4Packet(IPAddress sourceAddress, IPAddress destinationAddress, byte timeToLive = 64)
+        {
+            Version = 4;
+            internetHeaderLength = 20;
+            TypeOfService = 0;
+            identification = (ushort)new Random().Next();
+            flags = 0;
+            fragmentOffset = 0;
+            TimeToLive = timeToLive;
+            SourceAddress = sourceAddress;
+            DestinationAddress = destinationAddress;
+        }
+
+        internal void SetPayloadPacket(IPacket payloadPacket)
+        {
+            totalLength = (ushort)(internetHeaderLength + payloadPacket.Payload.Length);
+            switch (payloadPacket.GetType().Name)
+            {
+                case nameof(UdpPacket):
+                    Protocol = PacketType.Udp;
+                    break;
+                default:
+                    Protocol = (PacketType)143;
+                    break;
+            }
+            headerChecksum = ((Func<ushort>)(() =>
+            {
+                var sum = ((Version << 4 + internetHeaderLength) << 8 + TypeOfService) + totalLength + identification +
+                          (flags << 13 | fragmentOffset) + (TimeToLive << 8 + (byte)Protocol) +
+                          BitConverter.ToUInt16(SourceAddress.GetAddressBytes(), 0) +
+                          BitConverter.ToUInt16(SourceAddress.GetAddressBytes(), 2) +
+                          BitConverter.ToUInt16(DestinationAddress.GetAddressBytes(), 0) +
+                          BitConverter.ToUInt16(DestinationAddress.GetAddressBytes(), 2);
+                return (ushort)~(sum >> 16 + sum << 16 >> 16);
+            }))();
+            PayloadPacket = payloadPacket;
+            inited = true;
+        }
+
         internal IPv4Packet(IPAddress sourceAddress, IPAddress destinationAddress, IPacket payloadPacket, byte timeToLive = 64)
         {
             Version = 4;
@@ -91,6 +131,8 @@ namespace DNMPWindowsClient.PacketParser
             }))();
             SourceAddress = sourceAddress;
             DestinationAddress = destinationAddress;
+            PayloadPacket = payloadPacket;
+            inited = true;
         }
 
         internal static IPv4Packet Parse(byte[] bytes) => new IPv4Packet(new MemoryStream(bytes));
@@ -106,6 +148,8 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
+            if (!inited)
+                throw new Exception("Packet not inited with payload");
             var writer = new BinaryWriter(streamTo);
             writer.Write((byte) (Version << 4 | internetHeaderLength));
             writer.Write(TypeOfService);

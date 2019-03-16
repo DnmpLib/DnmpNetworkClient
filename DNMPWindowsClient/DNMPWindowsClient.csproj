@@ -93,6 +93,7 @@
     <Compile Include="NetworkManager.cs" />
     <Compile Include="PacketParser\ArpPacket.cs" />
     <Compile Include="PacketParser\DHCPPacket.cs" />
+    <Compile Include="PacketParser\DnsPacket.cs" />
     <Compile Include="PacketParser\DummyPacket.cs" />
     <Compile Include="PacketParser\EthernetPacket.cs" />
     <Compile Include="PacketParser\InvalidPacketException.cs" />

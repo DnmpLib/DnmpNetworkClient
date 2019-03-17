@@ -42,8 +42,10 @@ window.language = {
 	'config-property-StunConfig-Port': 'Порт STUN',
 	'config-property-StunConfig-PortMappingTimeout': 'Таймаут UPnP/PMP',
 	'config-property-StunConfig-PunchPort': 'Стандартный исходящий порт',
+	'config-property-TapConfig-SelfName': 'Текущее доменное имя',
 	'config-property-TapConfig-IpPrefix': 'Префикс IP адреса',
 	'config-property-TapConfig-MacPrefix': 'Префикс MAC адреса',
+	'config-property-TapConfig-DnsFormat': 'Формат доменов внутри сети',
 	'config-property-VisualizationConfig-ServerIp': 'IP сервера визуализации',
 	'config-property-VisualizationConfig-ServerPort': 'Порт сервера визуализации',
 	'config-property-WebServerConfig-HttpServerIp': 'Внешний IP веб-части',
@@ -128,8 +130,11 @@ function updateClientRow(id, data) {
 				$('<td>').attr('id', 'connected-client-' + id + '-public-ipport').attr('class', 'dev-mode')
 				.text(data.publicIpPort)
 			).append(
-				$('<td>').attr('id', 'connected-client-' + id + '-internal-ip')
+				$('<td>').attr('id', 'connected-client-' + id + '-internal-ip').attr('class', 'dev-mode')
 				.text(data.internalIp)
+			).append(
+				$('<td>').attr('id', 'connected-client-' + id + '-internal-domain')
+				.text(data.internalDomain)
 			).append(
 				$('<td>').attr('id', 'connected-client-' + id + '-direct-connection')
 				.html(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>')
@@ -158,6 +163,7 @@ function updateClientRow(id, data) {
 		$('#connected-client-' + id + '-parent-id').text(data.parentId == 65535 ? "-" : data.parentId);
 		$('#connected-client-' + id + '-public-ipport').text(data.publicIpPort);
 		$('#connected-client-' + id + '-internal-ip').text(data.internalIp);
+		$('#connected-client-' + id + '-internal-domain').text(data.internalDomain);
 		$('#connected-client-' + id + '-direct-connection').html(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>');
 		$('#connected-client-' + id + '-ping').text(data.ping == 65535 ? "-" : data.ping + ' мс');
 		$('#connected-client-' + id + '-bytes-received').text(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived);

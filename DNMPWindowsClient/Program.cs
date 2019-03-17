@@ -32,6 +32,24 @@ using Timer = System.Threading.Timer;
 
 namespace DNMPWindowsClient
 {
+    internal class DNMPNodeData
+    {
+        public string DomainName = "";
+
+        public byte[] GetBytes()
+        {
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this));
+        }
+    }
+
+    internal static class DNMPNodeExtension
+    {
+        public static DNMPNodeData GetDNMPNodeData(this DNMPNode node)
+        {
+            return JsonConvert.DeserializeObject<DNMPNodeData>(Encoding.UTF8.GetString(node.CustomData));
+        }
+    }
+
     internal class Program
     {
 
@@ -82,6 +100,9 @@ namespace DNMPWindowsClient
             [JsonProperty(PropertyName = "internalIp")]
             public string InternalIp;
 
+            [JsonProperty(PropertyName = "internalDomain")]
+            public string InternalDomain;
+
             [JsonProperty(PropertyName = "flags")]
             public ClientFlags Flags;
 
@@ -106,6 +127,7 @@ namespace DNMPWindowsClient
                 ParentId = client.ParentId;
                 PublicIpPort = client.EndPoint.ToString();
                 InternalIp = tapMessageInterface.GetIpFromId(client.Id).ToString();
+                InternalDomain = DomainNameUtil.GetDomain(client.GetDNMPNodeData().DomainName, config.TapConfig.DnsFormat);
                 Flags = client.Flags;
                 BytesReceived = client.BytesReceived;
                 BytesSent = client.BytesSent;
@@ -191,6 +213,8 @@ namespace DNMPWindowsClient
         
         private const string configFile = "config.json";
 
+        private static readonly DNMPNodeData selfNodeData = new DNMPNodeData();
+
         private static void Main()
         {
             if (!singleInstanceMutex.WaitOne(TimeSpan.Zero, true))
@@ -211,9 +235,6 @@ namespace DNMPWindowsClient
                 }
             }
 
-            //var visualizationConnectThread = new Thread(VisualizationThreadVoid);
-            //visualizationConnectThread.Start();
-
             running = true;
 
             var winFormsThread = new Thread(WinFormsThread);
@@ -224,11 +245,13 @@ namespace DNMPWindowsClient
             if (File.Exists(configFile))
                 config = JsonConvert.DeserializeObject<MainConfig>(File.ReadAllText(configFile));
             File.WriteAllText(configFile, JsonConvert.SerializeObject(config));
-            
+
+            selfNodeData.DomainName = config.TapConfig.SelfName;
+
             networkManager = new NetworkManager(config.NetworksSaveConfig.SaveFile);
             CleanUpVoid(null);
 
-            tapMessageInterface = new TapMessageInterface(config.TapConfig.IpPrefix, config.TapConfig.MacPrefix);
+            tapMessageInterface = new TapMessageInterface(config.TapConfig);
 
             dnmpClient = new DNMPClient(tapMessageInterface, new UdpProtocol(), config.ClientConfig);
 
@@ -556,10 +579,10 @@ namespace DNMPWindowsClient
                                                 networks = networkManager.SavedNetworks.Values.Select(x => new NetworkJsonData(x))
                                             }
                                         }));
-                                        Task.Run(() => dnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AESSymmetricKey()));
+                                        Task.Run(() => dnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AESSymmetricKey(), selfNodeData.GetBytes()));
                                     }
                                     else
-                                        Task.Run(() => dnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), true, networkConnectData.Item2, new AESSymmetricKey()));
+                                        Task.Run(() => dnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), true, networkConnectData.Item2, new AESSymmetricKey(), selfNodeData.GetBytes()));
                                     currentNetworkId = networkId;
                                     webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                                     {

@@ -59,13 +59,13 @@ namespace DNMPWindowsClient.PacketParser
                 var writer = new BigEndianBinaryWriter(streamTo);
                 Labels.ForEach(part =>
                 {
-                    writer.Write(part.Length);
+                    writer.Write((byte) part.Length);
                     writer.Write(Encoding.ASCII.GetBytes(part));
                 });
                 writer.Write((byte) 0);
                 writer.Write(Type);
                 writer.Write(Class);
-                if (!isQuery) return;
+                if (isQuery) return;
                 writer.Write(TTL);
                 writer.Write((ushort) Data.Length);
                 writer.Write(Data);
@@ -118,12 +118,10 @@ namespace DNMPWindowsClient.PacketParser
                 Answers.Add(new ResourceRecord(reader.BaseStream, true));
         }
 
-        public DnsPacket(byte opCode, byte replyCode, List<ResourceRecord> queries, List<ResourceRecord> answers,
+        public DnsPacket(ushort transactionId, byte opCode, byte replyCode, List<ResourceRecord> queries, List<ResourceRecord> answers,
             List<ResourceRecord> authorities, List<ResourceRecord> additionalRecords, DnsFlags flags)
         {
-            var transactionIdBytes = new byte[2];
-            System.Security.Cryptography.RandomNumberGenerator.Create().GetBytes(transactionIdBytes);
-            TransactionId = BitConverter.ToUInt16(transactionIdBytes, 0);
+            TransactionId = transactionId;
             Flags = flags;
             OpCode = opCode;
             ReplyCode = replyCode;
@@ -153,7 +151,7 @@ namespace DNMPWindowsClient.PacketParser
             writer.Write((ushort)Answers.Count);
             writer.Write((ushort)Authorities.Count);
             writer.Write((ushort)AdditionalRecords.Count);
-            Queries.ForEach(question => question.ToStream(writer.BaseStream, true));
+            Queries.ForEach(query => query.ToStream(writer.BaseStream, true));
             Answers.ForEach(answer => answer.ToStream(writer.BaseStream, false));
             Authorities.ForEach(authority => authority.ToStream(writer.BaseStream, false));
             AdditionalRecords.ForEach(additional => additional.ToStream(writer.BaseStream, false));

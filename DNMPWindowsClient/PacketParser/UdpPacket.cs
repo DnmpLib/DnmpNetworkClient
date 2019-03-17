@@ -24,7 +24,10 @@ namespace DNMPWindowsClient.PacketParser
             if (readAmount < Length) throw new InvalidPacketException();
             try
             {
+                if (SourcePort == 67 || SourcePort == 68 || DestinationPort == 67 || DestinationPort == 68)
+                    PayloadPacket = new DHCPPacket(stream, Length - 8);
                 else if (SourcePort == 53 || DestinationPort == 53)
+                    PayloadPacket = new DnsPacket(stream, Length - 8);
                 else
                     PayloadPacket = new DummyPacket(stream, Length - 8);
             }
@@ -32,6 +35,7 @@ namespace DNMPWindowsClient.PacketParser
             {
                 PayloadPacket = null;
             }
+
             reader.ReadBytes(readAmount - Length);
         }
 

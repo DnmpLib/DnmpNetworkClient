@@ -28,8 +28,10 @@ namespace DNMPWindowsClient
     [ValidableConfig]
     public class TapConfig
     {
-        [ValidableField("(.{1,63})")]
-        public string SelfName = Math.Abs(new Random().Next()).ToString(); //just random name
+        private static readonly Random random = new Random();
+
+        [ValidableField("([a-zA-Z0-9\\.\\-]{3,63})")]
+        public string SelfName = new string(Enumerable.Repeat("abcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[random.Next(s.Length)]).ToArray());
 
         [ValidableField("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.)(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")]
         public string IpPrefix = "10.228";

@@ -23,7 +23,7 @@ namespace DNMPWindowsClient.PacketParser
         internal byte TimeToLive;
         internal PacketType Protocol;
         private ushort headerChecksum;
-        private readonly byte[] options;
+        private readonly byte[] options = new byte[0];
         internal IPAddress SourceAddress;
         internal IPAddress DestinationAddress;
         internal IPacket PayloadPacket;
@@ -52,10 +52,10 @@ namespace DNMPWindowsClient.PacketParser
             switch (Protocol)
             {
                 case PacketType.Udp:
-                    PayloadPacket = new UdpPacket(stream, totalLength - (internetHeaderLength + 3) / 4 * 4);
+                    PayloadPacket = new UdpPacket(stream, totalLength - internetHeaderLength * 4);
                     break;
                 default:
-                    PayloadPacket = new DummyPacket(stream, totalLength - (internetHeaderLength + 3) / 4 * 4);
+                    PayloadPacket = new DummyPacket(stream, totalLength - internetHeaderLength * 4);
                     break;
             }
             reader.ReadBytes(readAmount - totalLength);
@@ -65,7 +65,7 @@ namespace DNMPWindowsClient.PacketParser
         internal IPv4Packet(IPAddress sourceAddress, IPAddress destinationAddress, byte timeToLive = 64)
         {
             Version = 4;
-            internetHeaderLength = 20;
+            internetHeaderLength = 5;
             TypeOfService = 0;
             identification = (ushort)new Random().Next();
             flags = 0;
@@ -77,7 +77,7 @@ namespace DNMPWindowsClient.PacketParser
 
         internal void SetPayloadPacket(IPacket payloadPacket)
         {
-            totalLength = (ushort)(internetHeaderLength + payloadPacket.Payload.Length);
+            totalLength = (ushort)(internetHeaderLength * 4 + payloadPacket.ToBytes().Length);
             switch (payloadPacket.GetType().Name)
             {
                 case nameof(UdpPacket):
@@ -89,13 +89,13 @@ namespace DNMPWindowsClient.PacketParser
             }
             headerChecksum = ((Func<ushort>)(() =>
             {
-                var sum = ((Version << 4 + internetHeaderLength) << 8 + TypeOfService) + totalLength + identification +
-                          (flags << 13 | fragmentOffset) + (TimeToLive << 8 + (byte)Protocol) +
-                          BitConverter.ToUInt16(SourceAddress.GetAddressBytes(), 0) +
-                          BitConverter.ToUInt16(SourceAddress.GetAddressBytes(), 2) +
-                          BitConverter.ToUInt16(DestinationAddress.GetAddressBytes(), 0) +
-                          BitConverter.ToUInt16(DestinationAddress.GetAddressBytes(), 2);
-                return (ushort)~(sum >> 16 + sum << 16 >> 16);
+                var sum = (((Version << 4) + internetHeaderLength) << 8 + TypeOfService) + totalLength + identification +
+                          ((flags << 13) | fragmentOffset) + ((TimeToLive << 8) + (byte) Protocol) +
+                          ((SourceAddress.GetAddressBytes()[0] << 8) | SourceAddress.GetAddressBytes()[1]) +
+                          ((SourceAddress.GetAddressBytes()[2] << 8) | SourceAddress.GetAddressBytes()[3]) +
+                          ((DestinationAddress.GetAddressBytes()[0] << 8) | DestinationAddress.GetAddressBytes()[1]) +
+                          ((DestinationAddress.GetAddressBytes()[2] << 8) | DestinationAddress.GetAddressBytes()[3]);
+                return (ushort)~((sum >> 16) + (sum & 0xFFFF));
             }))();
             PayloadPacket = payloadPacket;
             inited = true;
@@ -104,7 +104,7 @@ namespace DNMPWindowsClient.PacketParser
         internal IPv4Packet(IPAddress sourceAddress, IPAddress destinationAddress, IPacket payloadPacket, byte timeToLive = 64)
         {
             Version = 4;
-            internetHeaderLength = 20;
+            internetHeaderLength = 5;
             TypeOfService = 0;
             totalLength = (ushort)(internetHeaderLength + payloadPacket.Payload.Length);
             identification = (ushort)new Random().Next();
@@ -163,7 +163,6 @@ namespace DNMPWindowsClient.PacketParser
             writer.Write(SourceAddress.GetAddressBytes());
             writer.Write(DestinationAddress.GetAddressBytes());
             writer.Write(options);
-            writer.Write(new byte[(internetHeaderLength + 3) / 4 * 4 - internetHeaderLength]);
             PayloadPacket.ToStream(streamTo);
         }
     }

@@ -46,7 +46,7 @@ namespace DNMPWindowsClient.PacketParser
             Type = packetType;
         }
 
-        internal static EthernetPacket Parse(byte[] bytes) => new EthernetPacket(new MemoryStream(bytes));
+        internal static EthernetPacket Parse(byte[] bytes) => new EthernetPacket(new MemoryStream(bytes), bytes.Length);
 
 
         public byte[] Payload => PayloadPacket.ToBytes();

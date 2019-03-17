@@ -180,91 +180,94 @@ namespace DNMPWindowsClient
                         case EthernetPacket.PacketType.IpV4:
                             {
                                 var intId = GetIdFromPhysicalAddress(p.DestinationAddress);
-                                if (intId < 0)
+                                if (intId >= 0)
                                 {
-                                    switch (intId)
-                                    {
-                                        case -ipMacPoolShift:
-                                            continue;
-                                        case -1:
-                                            //TODO DNS
-                                            break;
-                                    }
+                                    if (HostExists((ushort) intId) || intId == selfId)
+                                        await Send(p.Payload, (ushort) intId);
+                                    continue;
                                 }
 
-                                var id = (ushort) intId;
-                                if (id == 0xFFFE)
+                                var ipPacket = (IPv4Packet) p.PayloadPacket;
+
+                                switch (intId)
                                 {
-                                    if (p.PayloadPacket is UdpPacket udpPacket &&
-                                        udpPacket.PayloadPacket is DHCPPacket dhcpPacket)
-                                    {
-                                        logger.Debug("Got DHCP packet");
-
-                                        if (dhcpPacket.Op != 1)
-                                            continue;
-                                        logger.Debug($"OP: {dhcpPacket.Op}");
-
-                                        var dhcpMessageType =
-                                            dhcpPacket.Options.ContainsKey(53) && dhcpPacket.Options[53].Length > 0
-                                                ? dhcpPacket.Options[53][0]
-                                                : -1;
-                                        logger.Debug($"DHCPMessageType: {dhcpMessageType}");
-                                        DHCPPacket answerDhcpPacket;
-
-                                        switch (dhcpMessageType)
+                                    case -ipMacPoolShift:
+                                        if (ipPacket.PayloadPacket is UdpPacket udpPacket &&
+                                            udpPacket.PayloadPacket is DHCPPacket dhcpPacket)
                                         {
-                                            case 1: // DHCPDISCOVER
-                                                answerDhcpPacket = new DHCPPacket
-                                                {
-                                                    Xid = dhcpPacket.Xid,
-                                                    YourIpAddress = GetIpFromId(selfId),
-                                                    ServerIpAddress = GetIpFromId(-1),
-                                                    ClientHardwareAddress = dhcpPacket.ClientHardwareAddress,
-                                                    Options = new System.Collections.Generic.Dictionary<byte, byte[]>
-                                                    {
-                                                        { 53, new byte[] { 2 } },
-                                                        { 1, new byte[] { 255, 255, 0, 0 } },
-                                                        { 51, BitConverter.GetBytes(30 * 60).Reverse().ToArray() },
-                                                        { 54, GetIpFromId(-1).GetAddressBytes() },
-                                                        { 6, GetIpFromId(-1).GetAddressBytes() }
-                                                    }
-                                                };
-                                                break;
-                                            case 3: // DHCPREQUEST
-                                                answerDhcpPacket = new DHCPPacket
-                                                {
-                                                    Xid = dhcpPacket.Xid,
-                                                    YourIpAddress = GetIpFromId(selfId),
-                                                    ServerIpAddress = GetIpFromId(-1),
-                                                    ClientHardwareAddress = dhcpPacket.ClientHardwareAddress,
-                                                    Options = new System.Collections.Generic.Dictionary<byte, byte[]>
-                                                    {
-                                                        { 53, new byte[] { 5 } },
-                                                        { 1, new byte[] { 255, 255, 0, 0 } },
-                                                        { 51, BitConverter.GetBytes(30 * 60).Reverse().ToArray() },
-                                                        { 54, GetIpFromId(-1).GetAddressBytes() },
-                                                        { 6, GetIpFromId(-1).GetAddressBytes() }
-                                                    }
-                                                };
-                                                break;
-                                            default:
+
+                                            if (dhcpPacket.Op != 1)
                                                 continue;
+
+                                            var dhcpMessageType =
+                                                dhcpPacket.Options.ContainsKey(53) &&
+                                                dhcpPacket.Options[53].Length > 0
+                                                    ? dhcpPacket.Options[53][0]
+                                                    : -1;
+                                            DHCPPacket answerDhcpPacket;
+
+                                            switch (dhcpMessageType)
+                                            {
+                                                case 1: // DHCPDISCOVER
+                                                    answerDhcpPacket = new DHCPPacket
+                                                    {
+                                                        Xid = dhcpPacket.Xid,
+                                                        YourIpAddress = GetIpFromId(selfId),
+                                                        ServerIpAddress = GetIpFromId(-1),
+                                                        ClientHardwareAddress = dhcpPacket.ClientHardwareAddress,
+                                                        Options =
+                                                            new System.Collections.Generic.Dictionary<byte, byte[]>
+                                                            {
+                                                                { 53, new byte[] {2} },
+                                                                { 1, new byte[] {255, 255, 0, 0} },
+                                                                { 51, BitConverter.GetBytes(30 * 60).Reverse().ToArray() },
+                                                                { 54, GetIpFromId(-1).GetAddressBytes() },
+                                                                { 6, GetIpFromId(-1).GetAddressBytes() }
+                                                            }
+                                                    };
+                                                    break;
+                                                case 3: // DHCPREQUEST
+                                                    answerDhcpPacket = new DHCPPacket
+                                                    {
+                                                        Xid = dhcpPacket.Xid,
+                                                        YourIpAddress = GetIpFromId(selfId),
+                                                        ServerIpAddress = GetIpFromId(-1),
+                                                        ClientHardwareAddress = dhcpPacket.ClientHardwareAddress,
+                                                        Options =
+                                                            new System.Collections.Generic.Dictionary<byte, byte[]>
+                                                            {
+                                                                { 53, new byte[] {5} },
+                                                                { 1, new byte[] {255, 255, 0, 0} },
+                                                                { 51, BitConverter.GetBytes(30 * 60).Reverse().ToArray() },
+                                                                { 54, GetIpFromId(-1).GetAddressBytes() },
+                                                                { 6, GetIpFromId(-1).GetAddressBytes() }
+                                                            }
+                                                    };
+                                                    break;
+                                                default:
+                                                    continue;
+                                            }
+
+                                            var answerIpV4Packet = new IPv4Packet(GetIpFromId(-1),
+                                                IPAddress.Broadcast);
+                                            answerIpV4Packet.SetPayloadPacket(new UdpPacket(67, 68,
+                                                answerDhcpPacket, answerIpV4Packet));
+                                            var answerEthernetPacket = new EthernetPacket(
+                                                GetPhysicalAddressFromId(-1),
+                                                p.SourceAddress, answerIpV4Packet, EthernetPacket.PacketType.IpV4);
+                                            var answerData = answerEthernetPacket.ToBytes();
+                                            await tapStream.WriteAsync(answerData, 0, answerData.Length,
+                                                cancellationToken);
+                                            continue;
                                         }
 
-                                        var answerIpV4Packet = new IPv4Packet(GetIpFromId(-1), IPAddress.Broadcast);
-                                        answerIpV4Packet.SetPayloadPacket(new UdpPacket(67, 68, answerDhcpPacket, answerIpV4Packet));
-                                        var answerEthernetPacket = new EthernetPacket(GetPhysicalAddressFromId(-1),
-                                            p.SourceAddress, answerIpV4Packet, EthernetPacket.PacketType.IpV4);
-                                        var answerData = answerEthernetPacket.ToBytes();
-                                        await tapStream.WriteAsync(answerData, 0, answerData.Length, cancellationToken);
+                                        await Broadcast(p.Payload);
                                         continue;
-                                    }
+                                    case -1:
 
-                                    await Broadcast(p.Payload);
+                                        //TODO DNS
+                                        continue;
                                 }
-
-                                if (HostExists(id) || id == selfId)
-                                    await Send(p.Payload, id);
                             }
                             break;
                         case EthernetPacket.PacketType.Arp:

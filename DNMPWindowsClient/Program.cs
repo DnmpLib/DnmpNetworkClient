@@ -18,6 +18,7 @@ using DNMPLibrary.Interaction.Protocol.ProtocolImpl;
 using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
 using DNMPLibrary.Security.Cryptography.Symmetric.Impl;
 using DNMPLibrary.Util;
+using DNMPWindowsClient.PacketParser;
 using Newtonsoft.Json.Linq;
 using NLog;
 using DNMPWindowsClient.Properties;

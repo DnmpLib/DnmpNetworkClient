@@ -29,11 +29,12 @@ namespace DNMPWindowsClient.PacketParser
             HardwareLength = reader.ReadByte();
             ProtocolLength = reader.ReadByte();
             Operation = (OperationType) reader.ReadUInt16();
-            if (readAmount != (HardwareLength + ProtocolLength) * 2 + 8) throw new InvalidPacketException();
+            if (readAmount < (HardwareLength + ProtocolLength) * 2 + 8) throw new InvalidPacketException();
             SenderHardwareAddress = reader.ReadBytes(HardwareLength);
             SenderProtocolAddress = reader.ReadBytes(ProtocolLength);
             TargetHardwareAddress = reader.ReadBytes(HardwareLength);
             TargetProtocolAddress = reader.ReadBytes(ProtocolLength);
+            reader.ReadBytes(readAmount - (HardwareLength + ProtocolLength) * 2 + 8);
         }
 
         internal ArpPacket()

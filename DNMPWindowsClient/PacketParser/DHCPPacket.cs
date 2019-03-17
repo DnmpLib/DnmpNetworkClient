@@ -12,21 +12,21 @@ namespace DNMPWindowsClient.PacketParser
 {
     internal class DHCPPacket : IPacket
     {
-        internal byte Op;
-        internal byte HardwareAddressType;
-        internal byte HardwareAddressLength;
+        internal byte Op = 2;
+        internal byte HardwareAddressType = 1;
+        internal byte HardwareAddressLength = 6;
         internal byte Hops;
         internal uint Xid;
         internal ushort Secs;
         internal ushort Flags;
-        internal IPAddress ClinetIpAddress;
-        internal IPAddress YourIpAddress;
-        internal IPAddress ServerIpAddress;
-        internal IPAddress RelayIpAddress;
-        internal PhysicalAddress ClientHardwareAddress;
-        internal string ServerHostName;
-        internal string BootFileName;
-        internal Dictionary<byte, byte[]> Options;
+        internal IPAddress ClinetIpAddress = IPAddress.Any;
+        internal IPAddress YourIpAddress = IPAddress.Any;
+        internal IPAddress ServerIpAddress = IPAddress.Any;
+        internal IPAddress RelayIpAddress = IPAddress.Any;
+        internal PhysicalAddress ClientHardwareAddress = PhysicalAddress.None;
+        internal string ServerHostName = "";
+        internal string BootFileName = "";
+        internal Dictionary<byte, byte[]> Options = new Dictionary<byte, byte[]>();
 
         internal DHCPPacket(Stream stream, int readAmount = int.MaxValue)
         {
@@ -99,7 +99,7 @@ namespace DNMPWindowsClient.PacketParser
             writer.Write(ServerIpAddress.GetAddressBytes());
             writer.Write(RelayIpAddress.GetAddressBytes());
             var address = ClientHardwareAddress.GetAddressBytes();
-            Array.Resize(ref address, HardwareAddressLength);
+            Array.Resize(ref address, 16);
             writer.Write(address);
             writer.Write(Encoding.ASCII.GetBytes(ServerHostName.PadRight(64, '\0')));
             writer.Write(Encoding.ASCII.GetBytes(BootFileName.PadRight(128, '\0')));
@@ -107,10 +107,10 @@ namespace DNMPWindowsClient.PacketParser
             foreach (var option in Options)
             {
                 writer.Write(option.Key);
-                writer.Write(option.Value.Length);
+                writer.Write((byte) option.Value.Length);
                 writer.Write(option.Value);
             }
-            writer.Write(255);
+            writer.Write((byte) 255);
         }
     }
 }

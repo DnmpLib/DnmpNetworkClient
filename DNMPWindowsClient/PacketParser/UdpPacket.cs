@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
@@ -9,7 +10,7 @@ namespace DNMPWindowsClient.PacketParser
         internal ushort SourcePort;
         internal ushort DestinationPort;
         internal ushort Length;
-        private readonly short checksum;
+        private readonly ushort checksum;
         internal IPacket PayloadPacket;
 
         internal UdpPacket(Stream stream, int readAmount = int.MaxValue)
@@ -19,11 +20,18 @@ namespace DNMPWindowsClient.PacketParser
             SourcePort = reader.ReadUInt16();
             DestinationPort = reader.ReadUInt16();
             Length = reader.ReadUInt16();
-            checksum = reader.ReadInt16();
+            checksum = reader.ReadUInt16();
             if (readAmount < Length) throw new InvalidPacketException();
-            if (SourcePort == 67 || SourcePort == 68 || DestinationPort == 67 || DestinationPort == 68)
-                PayloadPacket = new DHCPPacket(stream, Length - 8);
-            else PayloadPacket = new DummyPacket(stream, Length - 8);
+            try
+            {
+                else if (SourcePort == 53 || DestinationPort == 53)
+                else
+                    PayloadPacket = new DummyPacket(stream, Length - 8);
+            }
+            catch (Exception)
+            {
+                PayloadPacket = null;
+            }
             reader.ReadBytes(readAmount - Length);
         }
 
@@ -31,16 +39,19 @@ namespace DNMPWindowsClient.PacketParser
         {
             SourcePort = sourcePort;
             DestinationPort = destinationPort;
-            Length = (ushort)(payloadPacket.Payload.Length + 8);
+            Length = (ushort)(payloadPacket.ToBytes().Length + 8);
             PayloadPacket = payloadPacket;
-            var payload = ToBytes();
+            checksum = 0;
+            var preHeader = parent.SourceAddress.GetAddressBytes().Concat(parent.DestinationAddress.GetAddressBytes())
+                .Concat(new[] { (byte) 0, (byte) IPv4Packet.PacketType.Udp })
+                .Concat(new[] { (byte)(Length / 256), (byte)(Length % 256) });
+            var payload = preHeader.Concat(ToBytes()).ToArray();
             var sum = 0;
             for (var i = 0; i < payload.Length / 2; i++)
-                sum += BitConverter.ToUInt16(payload, i * 2);
-            sum += BitConverter.ToInt32(parent.SourceAddress.GetAddressBytes(), 0);
-            sum += BitConverter.ToInt32(parent.DestinationAddress.GetAddressBytes(), 0);
-            sum += Length;
-            checksum = (short)(sum >> 16 + sum << 16 >> 16);
+                sum += payload[i * 2] << 8 | payload[i * 2 + 1];
+            if (payload.Length % 2 == 1)
+                sum += payload.Last() << 8;
+            checksum = (ushort)~((sum >> 16) + (sum & 0xFFFF));
         }
 
         internal static UdpPacket Parse(byte[] bytes) => new UdpPacket(new MemoryStream(bytes));

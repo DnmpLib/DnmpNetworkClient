@@ -90,10 +90,10 @@ namespace DNMPWindowsClient.PacketParser
         internal DnsFlags Flags;
         internal byte OpCode;
         internal byte ReplyCode;
-        internal List<ResourceRecord> Queries;
-        internal List<ResourceRecord> Answers;
-        internal List<ResourceRecord> Authorities;
-        internal List<ResourceRecord> AdditionalRecords;
+        internal List<ResourceRecord> Queries = new List<ResourceRecord>();
+        internal List<ResourceRecord> Answers = new List<ResourceRecord>();
+        internal List<ResourceRecord> Authorities = new List<ResourceRecord>();
+        internal List<ResourceRecord> AdditionalRecords = new List<ResourceRecord>();
 
         internal DnsPacket(Stream stream, int readAmount = int.MaxValue)
         {

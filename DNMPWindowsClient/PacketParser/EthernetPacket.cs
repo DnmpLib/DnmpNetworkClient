@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using System.Net.NetworkInformation;
+using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -7,8 +8,8 @@ namespace DNMPWindowsClient.PacketParser
     {
         internal enum PacketType : ushort
         {
-            IpV4 = 0x0008,
-            Arp = 0x0608
+            IpV4 = 0x0800,
+            Arp = 0x0806
         }
 
         internal PhysicalAddress DestinationAddress;
@@ -19,7 +20,7 @@ namespace DNMPWindowsClient.PacketParser
         internal EthernetPacket(Stream packetStream, int readAmount = int.MaxValue)
         {
             if (readAmount < 14) throw new InvalidPacketException();
-            var reader = new BinaryReader(packetStream);
+            var reader = new BigEndianBinaryReader(packetStream);
             DestinationAddress = new PhysicalAddress(reader.ReadBytes(6));
             SourceAddress = new PhysicalAddress(reader.ReadBytes(6));
             Type = (PacketType) reader.ReadUInt16();
@@ -59,7 +60,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(DestinationAddress.GetAddressBytes());
             writer.Write(SourceAddress.GetAddressBytes());
             writer.Write((ushort) Type);

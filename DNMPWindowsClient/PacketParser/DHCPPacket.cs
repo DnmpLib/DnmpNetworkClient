@@ -6,6 +6,7 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Text;
 using System.Threading.Tasks;
+using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -30,7 +31,7 @@ namespace DNMPWindowsClient.PacketParser
         internal DHCPPacket(Stream stream, int readAmount = int.MaxValue)
         {
             if (readAmount < 236) throw new InvalidPacketException();
-            var reader = new BinaryReader(stream);
+            var reader = new BigEndianBinaryReader(stream);
             Op = reader.ReadByte();
             HardwareAddressType = reader.ReadByte();
             HardwareAddressLength = reader.ReadByte();
@@ -85,7 +86,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(Op);
             writer.Write(HardwareAddressType);
             writer.Write(HardwareAddressLength);
@@ -102,7 +103,7 @@ namespace DNMPWindowsClient.PacketParser
             writer.Write(address);
             writer.Write(Encoding.ASCII.GetBytes(ServerHostName.PadRight(64, '\0')));
             writer.Write(Encoding.ASCII.GetBytes(BootFileName.PadRight(128, '\0')));
-            writer.Write(new byte[] { 99, 130, 83, 99});
+            writer.Write(new byte[] { 99, 130, 83, 99 });
             foreach (var option in Options)
             {
                 writer.Write(option.Key);

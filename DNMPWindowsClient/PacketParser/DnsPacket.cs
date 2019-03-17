@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -19,7 +20,7 @@ namespace DNMPWindowsClient.PacketParser
 
             internal ResourceRecord(Stream stream, bool isQuery)
             {
-                var reader = new BinaryReader(stream);
+                var reader = new BigEndianBinaryReader(stream);
                 Labels = new List<string>();
                 var pointer = -1L;
                 for (; ; )
@@ -57,7 +58,7 @@ namespace DNMPWindowsClient.PacketParser
 
             internal void ToStream(Stream streamTo, bool isQuery)
             {
-                var writer = new BinaryWriter(streamTo);
+                var writer = new BigEndianBinaryWriter(streamTo);
                 Labels.ForEach(part =>
                 {
                     writer.Write(part.Length);
@@ -98,7 +99,7 @@ namespace DNMPWindowsClient.PacketParser
         {
             var data = new byte[readAmount];
             stream.Read(data, 0, readAmount);
-            var reader = new BinaryReader(new MemoryStream(data));
+            var reader = new BigEndianBinaryReader(new MemoryStream(data));
             if (readAmount < 12) throw new InvalidPacketException();
             TransactionId = reader.ReadUInt16();
             var flags = reader.ReadUInt16();
@@ -148,7 +149,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(TransactionId);
             writer.Write((ushort)((ushort)Flags | ReplyCode | (OpCode << 11)));
             writer.Write((ushort)Queries.Count);

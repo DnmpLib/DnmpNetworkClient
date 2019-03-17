@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -14,7 +15,7 @@ namespace DNMPWindowsClient.PacketParser
         internal UdpPacket(Stream stream, int readAmount = int.MaxValue)
         {
             if (readAmount < 8) throw new InvalidPacketException();
-            var reader = new BinaryReader(stream);
+            var reader = new BigEndianBinaryReader(stream);
             SourcePort = reader.ReadUInt16();
             DestinationPort = reader.ReadUInt16();
             Length = reader.ReadUInt16();
@@ -55,7 +56,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(SourcePort);
             writer.Write(DestinationPort);
             writer.Write(Length);

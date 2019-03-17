@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Net;
+using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -31,7 +32,7 @@ namespace DNMPWindowsClient.PacketParser
         internal IPv4Packet(Stream stream, int readAmount = int.MaxValue)
         {
             if (readAmount < 20) throw new InvalidPacketException();
-            var reader = new BinaryReader(stream);
+            var reader = new BigEndianBinaryReader(stream);
             var tmpbyte = reader.ReadByte();
             Version = (byte)(tmpbyte >> 4);
             internetHeaderLength = (byte)(tmpbyte & 0b00001111);
@@ -150,7 +151,7 @@ namespace DNMPWindowsClient.PacketParser
         {
             if (!inited)
                 throw new Exception("Packet not inited with payload");
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write((byte) (Version << 4 | internetHeaderLength));
             writer.Write(TypeOfService);
             writer.Write(totalLength);

@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
 {
@@ -6,7 +7,7 @@ namespace DNMPWindowsClient.PacketParser
     {
         internal enum OperationType : ushort
         {
-            Response = 0x0200
+            Response = 0x0002
         }
 
         internal ushort HardwareType;
@@ -22,7 +23,7 @@ namespace DNMPWindowsClient.PacketParser
         internal ArpPacket(Stream packetStream, int readAmount = int.MaxValue)
         {
             if (readAmount < 8) throw new InvalidPacketException();
-            var reader = new BinaryReader(packetStream);
+            var reader = new BigEndianBinaryReader(packetStream);
             HardwareType = reader.ReadUInt16();
             ProtocolType = reader.ReadUInt16();
             HardwareLength = reader.ReadByte();
@@ -51,7 +52,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(HardwareType);
             writer.Write(ProtocolType);
             writer.Write((byte)SenderHardwareAddress.Length);

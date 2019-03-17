@@ -8,6 +8,7 @@ using DNMPLibrary.Interaction.Protocol.EndPointFactoryImpl;
 using DNMPLibrary.Interaction.Protocol.EndPointImpl;
 using DNMPLibrary.Security.Cryptography.Asymmetric;
 using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
+using DNMPLibrary.Util.BigEndian;
 using Newtonsoft.Json;
 
 namespace DNMPWindowsClient
@@ -43,7 +44,7 @@ namespace DNMPWindowsClient
                 if (maxLength < 18)
                     throw new ArgumentException(@"maxLength should be at least 18", nameof(maxLength));
                 var memoryStream = new MemoryStream();
-                var binaryWriter = new BinaryWriter(memoryStream);
+                var binaryWriter = new BigEndianBinaryWriter(memoryStream);
                 var allEndPoints = SavedIpEndPoints.Select(x => x.Key).Select(Convert.FromBase64String).OrderBy(x => x.Length).ThenBy(x => Guid.NewGuid()).ToList(); // magic random shuffle
                 var needCount = 0;
                 var totalLength = 18;
@@ -116,7 +117,7 @@ namespace DNMPWindowsClient
 
         private static Tuple<Guid, List<byte[]>> ParseInviteCode(byte[] inviteCode)
         {
-            var binaryReader = new BinaryReader(new MemoryStream(inviteCode));
+            var binaryReader = new BigEndianBinaryReader(new MemoryStream(inviteCode));
             var networkId = new Guid(binaryReader.ReadBytes(16));
             var endPointCount = binaryReader.ReadInt32();
             var endPoints = new List<byte[]>();

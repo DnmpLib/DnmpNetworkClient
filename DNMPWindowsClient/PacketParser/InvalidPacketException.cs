@@ -8,7 +8,7 @@ namespace DNMPWindowsClient.PacketParser
 {
     internal class InvalidPacketException : Exception
     {
-        internal InvalidPacketException() : base() { }
+        internal InvalidPacketException() { }
         internal InvalidPacketException(string message) : base(message) { }
     }
 }

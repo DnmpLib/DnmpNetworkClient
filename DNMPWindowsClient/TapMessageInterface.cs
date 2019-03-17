@@ -285,8 +285,8 @@ namespace DNMPWindowsClient
                                     SenderHardwareAddress = GetPhysicalAddressFromIp(targetIp).GetAddressBytes(),
                                     SenderProtocolAddress = arpPacket.TargetProtocolAddress,
                                     Operation = ArpPacket.OperationType.Response,
-                                    HardwareType = 0x0100,
-                                    ProtocolType = 0x0008
+                                    HardwareType = 0x0001,
+                                    ProtocolType = 0x0800
                                 };
                                 var answerEthernetPacket = new EthernetPacket(GetPhysicalAddressFromIp(targetIp),
                                     new PhysicalAddress(arpPacket.SenderHardwareAddress), answerArpPacket,

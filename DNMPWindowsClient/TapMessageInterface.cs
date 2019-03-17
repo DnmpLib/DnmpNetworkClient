@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -11,10 +10,8 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using System.Net.NetworkInformation;
 using System.Security.Principal;
-using System.Text.RegularExpressions;
 using System.Threading;
 using DNMPLibrary.Interaction.MessageInterface;
-using DNMPLibrary.Util;
 using DNMPWindowsClient.PacketParser;
 using NLog;
 

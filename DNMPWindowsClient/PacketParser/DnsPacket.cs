@@ -1,9 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
 using DNMPLibrary.Util.BigEndian;
 
 namespace DNMPWindowsClient.PacketParser
@@ -37,7 +35,7 @@ namespace DNMPWindowsClient.PacketParser
                         if (pointer >= 0)
                             reader.BaseStream.Seek(pointer, SeekOrigin.Begin);
                         break;
-                    };
+                    }
                     Labels.Add(Encoding.ASCII.GetString(reader.ReadBytes(fragmentLn)));
                 }
 
@@ -110,7 +108,6 @@ namespace DNMPWindowsClient.PacketParser
             var answerRRs = reader.ReadUInt16();
             var authorityRRs = reader.ReadUInt16();
             var additionalRRs = reader.ReadUInt16();
-            readAmount -= 12;
             for (var query = 0; query < questions; query++)
                 Queries.Add(new ResourceRecord(reader.BaseStream, true));
             for (var answer = 0; answer < answerRRs; answer++)

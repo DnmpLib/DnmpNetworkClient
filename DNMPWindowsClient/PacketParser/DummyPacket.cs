@@ -4,7 +4,7 @@ namespace DNMPWindowsClient.PacketParser
 {
     internal sealed class DummyPacket : IPacket
     {
-        public byte[] Payload { get; private set; }
+        public byte[] Payload { get; }
         internal DummyPacket(Stream data, int readAmount = int.MaxValue)
         {
             Payload = new byte[data.Length - data.Position];

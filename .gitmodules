@@ -1,6 +1,3 @@
-[submodule "DNMPLibrary"]
-	path = DNMPLibrary
-	url = https://github.com/DNMPLib/DNMPLibrary.git
 [submodule "NetGain"]
 	path = NetGain
 	url = https://github.com/radioegor146/NetGain.git

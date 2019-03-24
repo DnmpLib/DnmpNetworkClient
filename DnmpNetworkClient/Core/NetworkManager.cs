@@ -8,7 +8,9 @@ using DnmpLibrary.Interaction.Protocol.EndPointFactoryImpl;
 using DnmpLibrary.Interaction.Protocol.EndPointImpl;
 using DnmpLibrary.Security.Cryptography.Asymmetric;
 using DnmpLibrary.Security.Cryptography.Asymmetric.Impl;
+using DnmpLibrary.Util;
 using DnmpLibrary.Util.BigEndian;
+using DnmpNetworkClient.Config;
 using DnmpNetworkClient.Util;
 using Newtonsoft.Json;
 
@@ -78,10 +80,14 @@ namespace DnmpNetworkClient.Core
 
         public Dictionary<Guid, SavedNetwork> SavedNetworks => new Dictionary<Guid, SavedNetwork>(savedNetworks);
 
-        public NetworkManager(string file)
+        private readonly NetworksSaveConfig config;
+
+        public NetworkManager(NetworksSaveConfig config)
         {
-            savedNetworks = File.Exists(file) ? JsonConvert.DeserializeObject<Dictionary<Guid, SavedNetwork>>(File.ReadAllText(file)) : new Dictionary<Guid, SavedNetwork>();
-            File.WriteAllText(file, JsonConvert.SerializeObject(savedNetworks));
+            this.config = config;
+            savedNetworks = File.Exists(config.SaveFile) ? JsonConvert.DeserializeObject<Dictionary<Guid, SavedNetwork>>(File.ReadAllText(config.SaveFile)) : new Dictionary<Guid, SavedNetwork>();
+            File.WriteAllText(config.SaveFile, JsonConvert.SerializeObject(savedNetworks));
+            CleanUpVoid(null);
         }
 
         public void CleanUpOldEndPoints(TimeSpan endPointTtl)
@@ -139,10 +145,21 @@ namespace DnmpNetworkClient.Core
 
         private readonly object networksSaveLock = new object();
 
+        public void SaveNetworks()
+        {
+            SaveNetworks(config.SaveFile);
+        }
+
         public void SaveNetworks(string file)
         {
             lock (networksSaveLock)
                 File.WriteAllText(file, JsonConvert.SerializeObject(savedNetworks));
+        }
+
+        private void CleanUpVoid(object _)
+        {
+            CleanUpOldEndPoints(TimeSpan.FromMilliseconds(config.SavedEndPointTtl));
+            EventQueue.AddEvent(CleanUpVoid, null, DateTime.Now + TimeSpan.FromMilliseconds(config.SavedEndPointsCleanUpInterval));
         }
     }
 }

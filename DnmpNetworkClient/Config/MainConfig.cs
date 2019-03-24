@@ -9,6 +9,12 @@ namespace DnmpNetworkClient.Config
     {
         [ValidableField("(\\d{1,})")]
         public int DefaultRsaKeySize = 2048;
+
+        [ValidableField("(\\d{1,})")]
+        public int ReceiveBufferSize = 16 * 1024 * 1024;
+
+        [ValidableField("(\\d{1,})")]
+        public int SendBufferSize = 16 * 1024 * 1024;
     }
 
     [ValidableConfig]

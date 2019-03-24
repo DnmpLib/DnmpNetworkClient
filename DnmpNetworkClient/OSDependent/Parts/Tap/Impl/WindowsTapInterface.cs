@@ -9,7 +9,7 @@ using Microsoft.Win32;
 using Microsoft.Win32.SafeHandles;
 using NLog;
 
-namespace DnmpNetworkClient.OSDependant.Parts.Tap.Impl
+namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
 {
     internal class WindowsTapInterface : ITapInterface
     {

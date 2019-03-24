@@ -5,7 +5,7 @@ using System.Windows.Forms;
 using DnmpNetworkClient.Config;
 using DnmpNetworkClient.Properties;
 
-namespace DnmpNetworkClient.OSDependant.Parts.Gui.Impl
+namespace DnmpNetworkClient.OSDependent.Parts.Gui.Impl
 {
     internal class WindowsGui : IGui
     {

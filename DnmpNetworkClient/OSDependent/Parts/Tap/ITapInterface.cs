@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using System.Net.NetworkInformation;
 
-namespace DnmpNetworkClient.OSDependant.Parts.Tap
+namespace DnmpNetworkClient.OSDependent.Parts.Tap
 {
     internal interface ITapInterface
     {

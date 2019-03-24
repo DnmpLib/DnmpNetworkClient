@@ -4,7 +4,7 @@ using System.Security.Principal;
 using System.Threading;
 using System.Windows.Forms;
 
-namespace DnmpNetworkClient.OSDependant.Parts.Runtime.Impl
+namespace DnmpNetworkClient.OSDependent.Parts.Runtime.Impl
 {
     internal class WindowsRuntime : IRuntime
     {
@@ -30,16 +30,12 @@ namespace DnmpNetworkClient.OSDependant.Parts.Runtime.Impl
             using (var identity = WindowsIdentity.GetCurrent())
             {
                 var principal = new WindowsPrincipal(identity);
-                if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
-                {
-                    MessageBox.Show(@"Для работы TAP-интерфейса требуются права администратора!", @"Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                if (principal.IsInRole(WindowsBuiltInRole.Administrator))
                     return;
-                }
+                MessageBox.Show(@"Для работы TAP-интерфейса требуются права администратора!", @"Ошибка",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
-
-        public void Init() { }
 
         public void PostInit() { }
     }

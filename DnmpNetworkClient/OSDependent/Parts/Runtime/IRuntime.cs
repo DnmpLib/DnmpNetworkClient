@@ -1,9 +1,8 @@
-﻿namespace DnmpNetworkClient.OSDependant.Parts.Runtime
+﻿namespace DnmpNetworkClient.OSDependent.Parts.Runtime
 {
     internal interface IRuntime
     {
         void PreInit();
-        void Init();
         void PostInit();
     }
 }

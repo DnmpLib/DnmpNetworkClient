@@ -1,18 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DnmpNetworkClient.OSDependant.Parts.Gui;
-using DnmpNetworkClient.OSDependant.Parts.Gui.Impl;
-using DnmpNetworkClient.OSDependant.Parts.Runtime;
-using DnmpNetworkClient.OSDependant.Parts.Runtime.Impl;
-using DnmpNetworkClient.OSDependant.Parts.Tap;
-using DnmpNetworkClient.OSDependant.Parts.Tap.Impl;
+﻿using DnmpNetworkClient.OSDependent.Parts.Gui;
+using DnmpNetworkClient.OSDependent.Parts.Gui.Impl;
+using DnmpNetworkClient.OSDependent.Parts.Runtime;
+using DnmpNetworkClient.OSDependent.Parts.Runtime.Impl;
+using DnmpNetworkClient.OSDependent.Parts.Tap;
+using DnmpNetworkClient.OSDependent.Parts.Tap.Impl;
 
-namespace DnmpNetworkClient.OSDependant.Impl
+namespace DnmpNetworkClient.OSDependent.Impl
 {
-    internal class WindowsDependant : IDependant
+    internal class WindowsDependent : IDependent
     {
         private readonly WindowsGui gui = new WindowsGui();
         private readonly WindowsTapInterface tapInterface = new WindowsTapInterface();

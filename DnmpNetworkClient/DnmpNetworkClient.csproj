@@ -55,6 +55,8 @@
     <ApplicationIcon>NotifyIcon.ico</ApplicationIcon>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="DevExpress.Data.v17.1, Version=17.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
+    <Reference Include="DevExpress.Xpo.v17.1, Version=17.1.3.0, Culture=neutral, PublicKeyToken=b88d1754d700e49a, processorArchitecture=MSIL" />
     <Reference Include="LumiSoft.Net, Version=2.0.4492.11923, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\LumiSoft.Net.2.0.4492.11923\lib\LumiSoft.Net.dll</HintPath>
     </Reference>
@@ -86,14 +88,23 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="OSDependant\Impl\WindowsDependant.cs" />
-    <Compile Include="OSDependant\Parts\Gui\Impl\WindowsGui.cs" />
-    <Compile Include="OSDependant\Parts\Gui\IGui.cs" />
-    <Compile Include="OSDependant\IDependant.cs" />
-    <Compile Include="OSDependant\Parts\Runtime\Impl\WindowsRuntime.cs" />
-    <Compile Include="OSDependant\Parts\Runtime\IRuntime.cs" />
-    <Compile Include="OSDependant\Parts\Tap\Impl\WindowsTapInterface.cs" />
-    <Compile Include="OSDependant\Parts\Tap\ITapInterface.cs" />
+    <Compile Include="Core\DnmpNodeData.cs" />
+    <Compile Include="Core\LocalServers\ClientHttpServer.cs" />
+    <Compile Include="Core\LocalServers\ClientWebSocketServer.cs" />
+    <Compile Include="Core\LocalServers\UtilClasses.cs" />
+    <Compile Include="Core\MainClient.cs" />
+    <Compile Include="OSDependent\Impl\UnixDependent.cs" />
+    <Compile Include="OSDependent\Impl\WindowsDependent.cs" />
+    <Compile Include="OSDependent\Parts\Gui\DummyGui.cs" />
+    <Compile Include="OSDependent\Parts\Gui\Impl\WindowsGui.cs" />
+    <Compile Include="OSDependent\Parts\Gui\IGui.cs" />
+    <Compile Include="OSDependent\IDependent.cs" />
+    <Compile Include="OSDependent\Parts\Runtime\DummyRuntime.cs" />
+    <Compile Include="OSDependent\Parts\Runtime\Impl\WindowsRuntime.cs" />
+    <Compile Include="OSDependent\Parts\Runtime\IRuntime.cs" />
+    <Compile Include="OSDependent\Parts\Tap\Impl\UnixTapInterface.cs" />
+    <Compile Include="OSDependent\Parts\Tap\Impl\WindowsTapInterface.cs" />
+    <Compile Include="OSDependent\Parts\Tap\ITapInterface.cs" />
     <Compile Include="Util\Base32Util.cs" />
     <Compile Include="Config\ConfigJsonConverter.cs" />
     <Compile Include="Tap\Util\DomainNameUtil.cs" />

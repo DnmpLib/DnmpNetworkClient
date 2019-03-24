@@ -1,26 +1,20 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
-using System.Runtime.InteropServices;
-using System.Security.Principal;
 using System.Threading;
 using System.Threading.Tasks;
 using DnmpLibrary.Interaction.MessageInterface;
 using DnmpNetworkClient.Config;
-using DnmpNetworkClient.OSDependant.Parts.Tap;
 using DnmpNetworkClient.Tap.PacketParser.Layer2;
 using DnmpNetworkClient.Tap.PacketParser.Layer3;
 using DnmpNetworkClient.Tap.PacketParser.Layer4;
 using DnmpNetworkClient.Tap.PacketParser.Layer7;
 using DnmpNetworkClient.Tap.Util;
 using DnmpNetworkClient.Core;
-using DnmpNetworkClient.OSDependant;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
+using DnmpNetworkClient.OSDependent.Parts.Tap;
 using NLog;
 
 namespace DnmpNetworkClient.Tap

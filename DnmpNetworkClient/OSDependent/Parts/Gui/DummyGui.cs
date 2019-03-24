@@ -2,8 +2,8 @@
 
 namespace DnmpNetworkClient.OSDependent.Parts.Gui
 {
-    internal interface IGui
+    internal class DummyGui : IGui
     {
-        void Start(MainConfig config);
+        public void Start(MainConfig config) { }
     }
 }

@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DnmpNetworkClient.OSDependant.Parts.Gui;
-using DnmpNetworkClient.OSDependant.Parts.Runtime;
-using DnmpNetworkClient.OSDependant.Parts.Tap;
+﻿using DnmpNetworkClient.OSDependent.Parts.Gui;
+using DnmpNetworkClient.OSDependent.Parts.Runtime;
+using DnmpNetworkClient.OSDependent.Parts.Tap;
 
-namespace DnmpNetworkClient.OSDependant
+namespace DnmpNetworkClient.OSDependent
 {
-    internal interface IDependant
+    internal interface IDependent
     {
         IGui GetGui();
 

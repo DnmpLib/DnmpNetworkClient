@@ -1,12 +1,13 @@
 ﻿using System.IO;
+using DnmpLibrary.Util.BigEndian;
 
-namespace DNMPWindowsClient.PacketParser
+namespace DnmpWindowsClient.PacketParser
 {
     internal class ArpPacket : IPacket
     {
         internal enum OperationType : ushort
         {
-            Response = 0x0200
+            Response = 0x0002
         }
 
         internal ushort HardwareType;
@@ -19,18 +20,21 @@ namespace DNMPWindowsClient.PacketParser
         internal byte[] TargetHardwareAddress;
         internal byte[] TargetProtocolAddress;
 
-        internal ArpPacket(Stream packetStream)
+        internal ArpPacket(Stream packetStream, int readAmount = int.MaxValue)
         {
-            var reader = new BinaryReader(packetStream);
+            if (readAmount < 8) throw new InvalidPacketException();
+            var reader = new BigEndianBinaryReader(packetStream);
             HardwareType = reader.ReadUInt16();
             ProtocolType = reader.ReadUInt16();
             HardwareLength = reader.ReadByte();
             ProtocolLength = reader.ReadByte();
             Operation = (OperationType) reader.ReadUInt16();
+            if (readAmount < (HardwareLength + ProtocolLength) * 2 + 8) throw new InvalidPacketException();
             SenderHardwareAddress = reader.ReadBytes(HardwareLength);
             SenderProtocolAddress = reader.ReadBytes(ProtocolLength);
             TargetHardwareAddress = reader.ReadBytes(HardwareLength);
             TargetProtocolAddress = reader.ReadBytes(ProtocolLength);
+            reader.ReadBytes(readAmount - (HardwareLength + ProtocolLength) * 2 + 8);
         }
 
         internal ArpPacket()
@@ -49,7 +53,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(HardwareType);
             writer.Write(ProtocolType);
             writer.Write((byte)SenderHardwareAddress.Length);

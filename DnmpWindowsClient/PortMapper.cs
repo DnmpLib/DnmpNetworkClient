@@ -6,7 +6,7 @@ using LumiSoft.Net.STUN.Client;
 using NLog;
 using Open.Nat;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
     internal static class PortMapperUtils
     {
@@ -24,7 +24,7 @@ namespace DNMPWindowsClient
             {
                 try
                 {
-                    await device.CreatePortMapAsync(new Mapping(Protocol.Udp, port, port, "DNMP auto port map"));
+                    await device.CreatePortMapAsync(new Mapping(Protocol.Udp, port, port, "Dnmp auto port map"));
                 }
                 catch (MappingException mappingException)
                 {

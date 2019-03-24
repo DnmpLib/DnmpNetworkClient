@@ -1,14 +1,15 @@
 ﻿using System.IO;
 using System.Net.NetworkInformation;
+using DnmpLibrary.Util.BigEndian;
 
-namespace DNMPWindowsClient.PacketParser
+namespace DnmpWindowsClient.PacketParser
 {
     internal class EthernetPacket : IPacket
     {
-        public enum PacketType : ushort
+        internal enum PacketType : ushort
         {
-            IpV4 = 0x0008,
-            Arp = 0x0608
+            IpV4 = 0x0800,
+            Arp = 0x0806
         }
 
         internal PhysicalAddress DestinationAddress;
@@ -16,22 +17,23 @@ namespace DNMPWindowsClient.PacketParser
         internal PacketType Type;
         internal IPacket PayloadPacket;
 
-        internal EthernetPacket(Stream packetStream)
+        internal EthernetPacket(Stream packetStream, int readAmount = int.MaxValue)
         {
-            var reader = new BinaryReader(packetStream);
+            if (readAmount < 14) throw new InvalidPacketException();
+            var reader = new BigEndianBinaryReader(packetStream);
             DestinationAddress = new PhysicalAddress(reader.ReadBytes(6));
             SourceAddress = new PhysicalAddress(reader.ReadBytes(6));
             Type = (PacketType) reader.ReadUInt16();
             switch (Type)
             {
                 case PacketType.Arp:
-                    PayloadPacket = new ArpPacket(packetStream);
+                    PayloadPacket = new ArpPacket(packetStream, readAmount - 14);
                     break;
                 case PacketType.IpV4:
-                    PayloadPacket = new IpV4Packet(packetStream);
+                    PayloadPacket = new IPv4Packet(packetStream, readAmount - 14);
                     break;
                 default:
-                    PayloadPacket = new DummyPacket(packetStream);
+                    PayloadPacket = new DummyPacket(packetStream, readAmount - 14);
                     break;
             }
         }
@@ -44,11 +46,7 @@ namespace DNMPWindowsClient.PacketParser
             Type = packetType;
         }
 
-        internal static EthernetPacket Parse(byte[] bytes)
-        {
-            var packetStream = new MemoryStream(bytes);
-            return new EthernetPacket(packetStream);
-        }
+        internal static EthernetPacket Parse(byte[] bytes) => new EthernetPacket(new MemoryStream(bytes), bytes.Length);
 
 
         public byte[] Payload => PayloadPacket.ToBytes();
@@ -62,7 +60,7 @@ namespace DNMPWindowsClient.PacketParser
 
         public void ToStream(Stream streamTo)
         {
-            var writer = new BinaryWriter(streamTo);
+            var writer = new BigEndianBinaryWriter(streamTo);
             writer.Write(DestinationAddress.GetAddressBytes());
             writer.Write(SourceAddress.GetAddressBytes());
             writer.Write((ushort) Type);

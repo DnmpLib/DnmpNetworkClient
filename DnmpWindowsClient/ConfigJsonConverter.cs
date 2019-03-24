@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Linq;
-using DNMPLibrary.Client;
+using DnmpLibrary.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
     internal class ConfigJsonConverter : JsonConverter
     {

@@ -6,7 +6,7 @@ using System.Runtime.InteropServices;
 // набора атрибутов. Измените значения этих атрибутов, чтобы изменить сведения,
 // связанные со сборкой.
 [assembly: AssemblyTitle("DynNetWindowsClient")]
-[assembly: AssemblyDescription("DNMP Client for Windows OS")]
+[assembly: AssemblyDescription("Dnmp Client for Windows OS")]
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("")]
 [assembly: AssemblyProduct("DynNetWindowsClient")]

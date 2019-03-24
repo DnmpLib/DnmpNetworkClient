@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
     internal class MimeTypeHelper
     {

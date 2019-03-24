@@ -21,7 +21,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
     public static class Base32
     {

@@ -1,6 +1,8 @@
-﻿using DNMPLibrary.Client;
+﻿using System;
+using System.Linq;
+using DnmpLibrary.Client;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
     [ValidableConfig]
     internal class GeneralConfig
@@ -23,13 +25,21 @@ namespace DNMPWindowsClient
     }
 
     [ValidableConfig]
-    internal class TapConfig
+    public class TapConfig
     {
+        private static readonly Random random = new Random();
+
+        [ValidableField("([a-zA-Z0-9\\.\\-]{3,63})")]
+        public string SelfName = new string(Enumerable.Repeat("abcdefghijklmnopqrstuvwxyz0123456789", 8).Select(s => s[random.Next(s.Length)]).ToArray());
+
         [ValidableField("(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.)(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)")]
         public string IpPrefix = "10.228";
 
         [ValidableField("([0-9a-fA-F]{2}):([0-9a-fA-F]{2}):([0-9a-fA-F]{2}):([0-9a-fA-F]{2})")]
         public string MacPrefix = "CA:FE:BA:BE";
+
+        [ValidableField("(.*?)%name%(.*?)")]
+        public string DnsFormat = "%name%.dnmp";
     }
 
     [ValidableConfig]

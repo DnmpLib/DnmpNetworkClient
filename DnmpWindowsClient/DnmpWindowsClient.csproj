@@ -6,8 +6,8 @@
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1A57D6E7-45A0-403E-A319-B85354F75BC6}</ProjectGuid>
     <OutputType>WinExe</OutputType>
-    <RootNamespace>DNMPWindowsClient</RootNamespace>
-    <AssemblyName>DNMPWindowsClient</AssemblyName>
+    <RootNamespace>DnmpWindowsClient</RootNamespace>
+    <AssemblyName>DnmpWindowsClient</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <AutoGenerateBindingRedirects>true</AutoGenerateBindingRedirects>
@@ -49,7 +49,7 @@
     <AllowedReferenceRelatedFileExtensions>.pdb;.pri</AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>DNMPWindowsClient.Program</StartupObject>
+    <StartupObject>DnmpWindowsClient.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>NotifyIcon.ico</ApplicationIcon>
@@ -88,14 +88,19 @@
   <ItemGroup>
     <Compile Include="Base32.cs" />
     <Compile Include="ConfigJsonConverter.cs" />
+    <Compile Include="DomainNameUtil.cs" />
     <Compile Include="MainConfig.cs" />
     <Compile Include="MimeTypeHelper.cs" />
     <Compile Include="NetworkManager.cs" />
     <Compile Include="PacketParser\ArpPacket.cs" />
+    <Compile Include="PacketParser\DhcpPacket.cs" />
+    <Compile Include="PacketParser\DnsPacket.cs" />
     <Compile Include="PacketParser\DummyPacket.cs" />
     <Compile Include="PacketParser\EthernetPacket.cs" />
+    <Compile Include="PacketParser\InvalidPacketException.cs" />
     <Compile Include="PacketParser\IPv4Packet.cs" />
     <Compile Include="PacketParser\IPacket.cs" />
+    <Compile Include="PacketParser\UdpPacket.cs" />
     <Compile Include="PortMapper.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
@@ -104,7 +109,7 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RSAKeyUtils.cs" />
+    <Compile Include="RsaKeyUtils.cs" />
     <Compile Include="TapMessageInterface.cs" />
   </ItemGroup>
   <ItemGroup>
@@ -206,9 +211,9 @@
     </EmbeddedResource>
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DNMPLibrary\DNMPLibrary\DNMPLibrary.csproj">
+    <ProjectReference Include="..\DnmpLibrary\DnmpLibrary\DnmpLibrary.csproj">
       <Project>{6dee7efb-c645-4e50-b6a3-9acd533e3c10}</Project>
-      <Name>DNMPLibrary</Name>
+      <Name>DnmpLibrary</Name>
     </ProjectReference>
     <ProjectReference Include="..\NetGain\src\StackExchange.NetGain\StackExchange.NetGain.csproj">
       <Project>{a22dbaa1-19fc-4d67-af90-0114ef471d58}</Project>

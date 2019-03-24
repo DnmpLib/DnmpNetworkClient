@@ -11,16 +11,17 @@ using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Windows.Forms;
-using DNMPLibrary.Client;
-using DNMPLibrary.Core;
-using DNMPLibrary.Interaction.Protocol.EndPointImpl;
-using DNMPLibrary.Interaction.Protocol.ProtocolImpl;
-using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
-using DNMPLibrary.Security.Cryptography.Symmetric.Impl;
-using DNMPLibrary.Util;
+using DnmpLibrary.Client;
+using DnmpLibrary.Core;
+using DnmpLibrary.Interaction.Protocol.EndPointImpl;
+using DnmpLibrary.Interaction.Protocol.ProtocolImpl;
+using DnmpLibrary.Security.Cryptography.Asymmetric.Impl;
+using DnmpLibrary.Security.Cryptography.Symmetric.Impl;
+using DnmpLibrary.Util;
+using DnmpWindowsClient;
+using DnmpWindowsClient.Properties;
 using Newtonsoft.Json.Linq;
 using NLog;
-using DNMPWindowsClient.Properties;
 using Newtonsoft.Json;
 using uhttpsharp;
 using uhttpsharp.RequestProviders;
@@ -29,8 +30,26 @@ using StackExchange.NetGain;
 using StackExchange.NetGain.WebSockets;
 using Timer = System.Threading.Timer;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
+    internal class DnmpNodeData
+    {
+        public string DomainName = "";
+
+        public byte[] GetBytes()
+        {
+            return Encoding.UTF8.GetBytes(JsonConvert.SerializeObject(this));
+        }
+    }
+
+    internal static class DnmpNodeExtension
+    {
+        public static DnmpNodeData GetDnmpNodeData(this DnmpNode node)
+        {
+            return JsonConvert.DeserializeObject<DnmpNodeData>(Encoding.UTF8.GetString(node.CustomData));
+        }
+    }
+
     internal class Program
     {
 
@@ -45,7 +64,7 @@ namespace DNMPWindowsClient
 
         private static TapMessageInterface tapMessageInterface;
 
-        private static DNMPClient dnmpClient;
+        private static DnmpClient dnmpClient;
 
         private static readonly Random random = new Random();
 
@@ -81,6 +100,9 @@ namespace DNMPWindowsClient
             [JsonProperty(PropertyName = "internalIp")]
             public string InternalIp;
 
+            [JsonProperty(PropertyName = "internalDomain")]
+            public string InternalDomain;
+
             [JsonProperty(PropertyName = "flags")]
             public ClientFlags Flags;
 
@@ -99,12 +121,13 @@ namespace DNMPWindowsClient
             [JsonProperty(PropertyName = "ping")]
             public int Ping;
 
-            public ClientJsonData(DNMPNode client)
+            public ClientJsonData(DnmpNode client)
             {
                 Id = client.Id;
                 ParentId = client.ParentId;
                 PublicIpPort = client.EndPoint.ToString();
                 InternalIp = tapMessageInterface.GetIpFromId(client.Id).ToString();
+                InternalDomain = DomainNameUtil.GetDomain(client.GetDnmpNodeData().DomainName, config.TapConfig.DnsFormat);
                 Flags = client.Flags;
                 BytesReceived = client.BytesReceived;
                 BytesSent = client.BytesSent;
@@ -190,6 +213,8 @@ namespace DNMPWindowsClient
         
         private const string configFile = "config.json";
 
+        private static readonly DnmpNodeData selfNodeData = new DnmpNodeData();
+
         private static void Main()
         {
             if (!singleInstanceMutex.WaitOne(TimeSpan.Zero, true))
@@ -210,9 +235,6 @@ namespace DNMPWindowsClient
                 }
             }
 
-            //var visualizationConnectThread = new Thread(VisualizationThreadVoid);
-            //visualizationConnectThread.Start();
-
             running = true;
 
             var winFormsThread = new Thread(WinFormsThread);
@@ -223,13 +245,15 @@ namespace DNMPWindowsClient
             if (File.Exists(configFile))
                 config = JsonConvert.DeserializeObject<MainConfig>(File.ReadAllText(configFile));
             File.WriteAllText(configFile, JsonConvert.SerializeObject(config));
-            
+
+            selfNodeData.DomainName = config.TapConfig.SelfName;
+
             networkManager = new NetworkManager(config.NetworksSaveConfig.SaveFile);
             CleanUpVoid(null);
 
-            tapMessageInterface = new TapMessageInterface(config.TapConfig.IpPrefix, config.TapConfig.MacPrefix);
+            tapMessageInterface = new TapMessageInterface(config.TapConfig);
 
-            dnmpClient = new DNMPClient(tapMessageInterface, new UdpProtocol(), config.ClientConfig);
+            dnmpClient = new DnmpClient(tapMessageInterface, new UdpProtocol(), config.ClientConfig);
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
             {
@@ -272,11 +296,11 @@ namespace DNMPWindowsClient
                                         {
                                             state = dnmpClient.CurrentStatus,
                                             selfClientId = dnmpClient.SelfClient?.Id ?? 0xFFFF,
-                                            clients = dnmpClient.CurrentStatus == DNMPClient.ClientStatus.Connected &&
+                                            clients = dnmpClient.CurrentStatus == DnmpClient.ClientStatus.Connected &&
                                                       dnmpClient.SelfClient != null
                                                 ? dnmpClient.ClientsById.Concat(new[]
                                                     {
-                                                        new KeyValuePair<ushort, DNMPNode>(
+                                                        new KeyValuePair<ushort, DnmpNode>(
                                                             dnmpClient.SelfClient.Id, dnmpClient.SelfClient)
                                                     })
                                                     .Select(x => new ClientJsonData(x.Value))
@@ -315,7 +339,7 @@ namespace DNMPWindowsClient
                     eventType = WebGuiEventType.SelfStatusChange,
                     eventData = new
                     {
-                        status = DNMPClient.ClientStatus.Connected,
+                        status = DnmpClient.ClientStatus.Connected,
                         selfClient = new ClientJsonData(dnmpClient.SelfClient)
                     }
                 }));
@@ -329,7 +353,7 @@ namespace DNMPWindowsClient
                     eventType = WebGuiEventType.SelfStatusChange,
                     eventData = new
                     {
-                        status = DNMPClient.ClientStatus.NotConnected
+                        status = DnmpClient.ClientStatus.NotConnected
                     }
                 }));
             };
@@ -342,7 +366,7 @@ namespace DNMPWindowsClient
                     eventType = WebGuiEventType.SelfStatusChange,
                     eventData = new
                     {
-                        status = DNMPClient.ClientStatus.NotConnected
+                        status = DnmpClient.ClientStatus.NotConnected
                     }
                 }));
             };
@@ -431,7 +455,7 @@ namespace DNMPWindowsClient
                                     var networkName = requestObject["requestData"]["name"].Value<string>() ??
                                                       "My best network - " + random.Next();
                                     networkManager.AddNetwork(networkName,
-                                        RSAKeyUtils.PrivateKeyToPKCS8(new RSAAsymmetricKey(keySize).KeyParameters));
+                                        RsaKeyUtils.PrivateKeyToPKCS8(new RsaAsymmetricKey(keySize).KeyParameters));
                                     networkManager.SaveNetworks(config.NetworksSaveConfig.SaveFile);
                                     webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                                     {
@@ -555,17 +579,17 @@ namespace DNMPWindowsClient
                                                 networks = networkManager.SavedNetworks.Values.Select(x => new NetworkJsonData(x))
                                             }
                                         }));
-                                        Task.Run(() => dnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AESSymmetricKey()));
+                                        Task.Run(() => dnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AesSymmetricKey(), selfNodeData.GetBytes()));
                                     }
                                     else
-                                        Task.Run(() => dnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), true, networkConnectData.Item2, new AESSymmetricKey()));
+                                        Task.Run(() => dnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), true, networkConnectData.Item2, new AesSymmetricKey(), selfNodeData.GetBytes()));
                                     currentNetworkId = networkId;
                                     webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                                     {
                                         eventType = WebGuiEventType.SelfStatusChange,
                                         eventData = new
                                         {
-                                            status = DNMPClient.ClientStatus.Connecting
+                                            status = DnmpClient.ClientStatus.Connecting
                                         }
                                     }));
                                     response = new

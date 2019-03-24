@@ -3,21 +3,22 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
-using DNMPLibrary.Interaction.Protocol;
-using DNMPLibrary.Interaction.Protocol.EndPointFactoryImpl;
-using DNMPLibrary.Interaction.Protocol.EndPointImpl;
-using DNMPLibrary.Security.Cryptography.Asymmetric;
-using DNMPLibrary.Security.Cryptography.Asymmetric.Impl;
+using DnmpLibrary.Interaction.Protocol;
+using DnmpLibrary.Interaction.Protocol.EndPointFactoryImpl;
+using DnmpLibrary.Interaction.Protocol.EndPointImpl;
+using DnmpLibrary.Security.Cryptography.Asymmetric;
+using DnmpLibrary.Security.Cryptography.Asymmetric.Impl;
+using DnmpLibrary.Util.BigEndian;
 using Newtonsoft.Json;
 
-namespace DNMPWindowsClient
+namespace DnmpWindowsClient
 {
     internal class NetworkManager
     {
         public class SavedNetwork
         {
             [JsonIgnore]
-            public RSAParameters Key => RSAKeyUtils.DecodePrivateKeyInfo(KeyBytes).ExportParameters(true);//RSAKeyUtils.DecodeRSAPrivateKeyToRSAParam(KeyBytes);
+            public RSAParameters Key => RsaKeyUtils.DecodePrivateKeyInfo(KeyBytes).ExportParameters(true);//RSAKeyUtils.DecodeRSAPrivateKeyToRSAParam(KeyBytes);
 
             [JsonIgnore]
             public Guid Id => new Guid(MD5.Create().ComputeHash(Key.Modulus.Concat(Key.Exponent).ToArray()));
@@ -30,7 +31,7 @@ namespace DNMPWindowsClient
             {
                 KeyBytes = keyBytes;
                 Name = name;
-                RSAKeyUtils.DecodeRSAPrivateKeyToRSAParam(KeyBytes);
+                RsaKeyUtils.DecodeRsaPrivateKeyToRsaParam(KeyBytes);
             }
 
             public byte[] GenerateKeyData()
@@ -43,7 +44,7 @@ namespace DNMPWindowsClient
                 if (maxLength < 18)
                     throw new ArgumentException(@"maxLength should be at least 18", nameof(maxLength));
                 var memoryStream = new MemoryStream();
-                var binaryWriter = new BinaryWriter(memoryStream);
+                var binaryWriter = new BigEndianBinaryWriter(memoryStream);
                 var allEndPoints = SavedIpEndPoints.Select(x => x.Key).Select(Convert.FromBase64String).OrderBy(x => x.Length).ThenBy(x => Guid.NewGuid()).ToList(); // magic random shuffle
                 var needCount = 0;
                 var totalLength = 18;
@@ -65,7 +66,7 @@ namespace DNMPWindowsClient
 
             public Tuple<IEnumerable<IEndPoint>, IAsymmetricKey> GetConnectionData()
             {
-                return new Tuple<IEnumerable<IEndPoint>, IAsymmetricKey>(SavedIpEndPoints.Select(x => new RealIPEndPointFactory().DeserializeEndPoint(Convert.FromBase64String(x.Key))), new RSAAsymmetricKey
+                return new Tuple<IEnumerable<IEndPoint>, IAsymmetricKey>(SavedIpEndPoints.Select(x => new RealIPEndPointFactory().DeserializeEndPoint(Convert.FromBase64String(x.Key))), new RsaAsymmetricKey
                 {
                     KeyParameters = Key
                 });
@@ -116,7 +117,7 @@ namespace DNMPWindowsClient
 
         private static Tuple<Guid, List<byte[]>> ParseInviteCode(byte[] inviteCode)
         {
-            var binaryReader = new BinaryReader(new MemoryStream(inviteCode));
+            var binaryReader = new BigEndianBinaryReader(new MemoryStream(inviteCode));
             var networkId = new Guid(binaryReader.ReadBytes(16));
             var endPointCount = binaryReader.ReadInt32();
             var endPoints = new List<byte[]>();

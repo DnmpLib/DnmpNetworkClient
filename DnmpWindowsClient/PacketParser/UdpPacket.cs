@@ -58,7 +58,7 @@ namespace DnmpWindowsClient.PacketParser
             checksum = (ushort)~((sum >> 16) + (sum & 0xFFFF));
         }
 
-        internal static UdpPacket Parse(byte[] bytes) => new UdpPacket(new MemoryStream(bytes));
+        internal static UdpPacket Parse(byte[] bytes) => new UdpPacket(new MemoryStream(bytes), bytes.Length);
 
         public byte[] Payload => PayloadPacket.ToBytes();
 

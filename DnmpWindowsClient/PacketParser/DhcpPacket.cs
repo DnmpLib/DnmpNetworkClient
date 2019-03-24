@@ -72,7 +72,7 @@ namespace DnmpWindowsClient.PacketParser
 
         internal DhcpPacket() { }
 
-        internal static DhcpPacket Parse(byte[] bytes) => new DhcpPacket(new MemoryStream(bytes));
+        internal static DhcpPacket Parse(byte[] bytes) => new DhcpPacket(new MemoryStream(bytes), bytes.Length);
 
         public byte[] Payload => throw new InvalidOperationException();
 

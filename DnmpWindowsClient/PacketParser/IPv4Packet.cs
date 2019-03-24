@@ -136,7 +136,7 @@ namespace DnmpWindowsClient.PacketParser
             inited = true;
         }
 
-        internal static IPv4Packet Parse(byte[] bytes) => new IPv4Packet(new MemoryStream(bytes));
+        internal static IPv4Packet Parse(byte[] bytes) => new IPv4Packet(new MemoryStream(bytes), bytes.Length);
 
         public byte[] Payload => PayloadPacket.ToBytes();
 

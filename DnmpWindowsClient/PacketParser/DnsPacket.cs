@@ -131,7 +131,7 @@ namespace DnmpWindowsClient.PacketParser
             AdditionalRecords = additionalRecords ?? throw new ArgumentNullException(nameof(additionalRecords));
         }
 
-        internal static DnsPacket Parse(byte[] data) => new DnsPacket(new MemoryStream(data));
+        internal static DnsPacket Parse(byte[] data) => new DnsPacket(new MemoryStream(data), data.Length);
 
         public byte[] Payload => throw new InvalidOperationException();
 

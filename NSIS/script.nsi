@@ -3,7 +3,7 @@
 ; HM NIS Edit Wizard helper defines
 !define PRODUCT_NAME "Dnmp Client"
 !define PRODUCT_VERSION "1.0.0.0"
-!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\DnmpWindowsClient.exe"
+!define PRODUCT_DIR_REGKEY "Software\Microsoft\Windows\CurrentVersion\App Paths\DnmpNetworkClient.exe"
 !define PRODUCT_UNINST_KEY "Software\Microsoft\Windows\CurrentVersion\Uninstall\${PRODUCT_NAME}"
 !define PRODUCT_UNINST_ROOT_KEY "HKLM"
 !define PRODUCT_STARTMENU_REGVAL "NSIS:StartMenuDir"
@@ -42,7 +42,7 @@ var ICONS_GROUP
 ; Instfiles page
 !insertmacro MUI_PAGE_INSTFILES
 ; Finish page
-!define MUI_FINISHPAGE_RUN "$INSTDIR\DnmpWindowsClient.exe"
+!define MUI_FINISHPAGE_RUN "$INSTDIR\DnmpNetworkClient.exe"
 !insertmacro MUI_PAGE_FINISH
 
 ; Uninstaller pages
@@ -58,7 +58,7 @@ var ICONS_GROUP
 ; MUI end ------
 
 Name "${PRODUCT_NAME} ${PRODUCT_VERSION}"
-OutFile "DnmpWindowsClient.Setup.Any.exe"
+OutFile "DnmpNetworkClient.Setup.Any.exe"
 InstallDir "$PROGRAMFILES64\Dnmp Client"
 InstallDirRegKey HKLM "${PRODUCT_DIR_REGKEY}" ""
 ShowInstDetails show
@@ -99,11 +99,11 @@ SectionEnd
 Section "MainSection" SEC03
   SetOutPath "$INSTDIR"
   SetOverwrite try
-  File /r "..\DnmpWindowsClient\bin\Release\"
+  File /r "..\DnmpNetworkClient\bin\Release\"
   !insertmacro MUI_STARTMENU_WRITE_BEGIN Application
   CreateDirectory "$SMPROGRAMS\$ICONS_GROUP"
-  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Dnmp Client.lnk" "$INSTDIR\DnmpWindowsClient.exe"
-  CreateShortCut "$DESKTOP\Dnmp Client.lnk" "$INSTDIR\DnmpWindowsClient.exe"
+  CreateShortCut "$SMPROGRAMS\$ICONS_GROUP\Dnmp Client.lnk" "$INSTDIR\DnmpNetworkClient.exe"
+  CreateShortCut "$DESKTOP\Dnmp Client.lnk" "$INSTDIR\DnmpNetworkClient.exe"
   !insertmacro MUI_STARTMENU_WRITE_END
 SectionEnd
 
@@ -116,10 +116,10 @@ SectionEnd
 
 Section -Post
   WriteUninstaller "$INSTDIR\uninst.exe"
-  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\DnmpWindowsClient.exe"
+  WriteRegStr HKLM "${PRODUCT_DIR_REGKEY}" "" "$INSTDIR\DnmpNetworkClient.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayName" "$(^Name)"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "UninstallString" "$INSTDIR\uninst.exe"
-  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\DnmpWindowsClient.exe"
+  WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayIcon" "$INSTDIR\DnmpNetworkClient.exe"
   WriteRegStr ${PRODUCT_UNINST_ROOT_KEY} "${PRODUCT_UNINST_KEY}" "DisplayVersion" "${PRODUCT_VERSION}"
 SectionEnd
 

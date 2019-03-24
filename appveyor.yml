@@ -19,7 +19,7 @@ after_build:
 
     cp NSIS/DnmpWindowsClient.Setup.Any.exe output/DnmpWindowsClient.Setup.Any.exe
 
-    7z a output/DnmpWindowsClient.Any.zip DnmpWindowsClient/bin/Release/*
+    7z a output/DnmpWindowsClient.Any.zip ./DnmpWindowsClient/bin/Release/*
 artifacts:
 - path: output\*
   name: main-binaries

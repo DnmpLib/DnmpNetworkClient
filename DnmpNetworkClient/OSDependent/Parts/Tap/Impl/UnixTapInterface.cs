@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using Mono.Unix;

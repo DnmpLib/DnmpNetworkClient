@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
 using System.IO;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
-using System.Security.Principal;
 using System.Text;
-using System.Threading.Tasks;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Windows.Forms;
+using System.Threading.Tasks;
 using DnmpLibrary.Client;
 using DnmpLibrary.Core;
 using DnmpLibrary.Interaction.Protocol.EndPointImpl;
@@ -18,19 +15,23 @@ using DnmpLibrary.Interaction.Protocol.ProtocolImpl;
 using DnmpLibrary.Security.Cryptography.Asymmetric.Impl;
 using DnmpLibrary.Security.Cryptography.Symmetric.Impl;
 using DnmpLibrary.Util;
-using DnmpWindowsClient;
-using DnmpWindowsClient.Properties;
+using DnmpWindowsClient.Config;
+using DnmpWindowsClient.OSDependant;
+using DnmpWindowsClient.OSDependant.Impl;
+using DnmpWindowsClient.Tap;
+using DnmpWindowsClient.Tap.Util;
+using DnmpWindowsClient.Util;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using NLog;
-using Newtonsoft.Json;
-using uhttpsharp;
-using uhttpsharp.RequestProviders;
-using uhttpsharp.Listeners;
 using StackExchange.NetGain;
 using StackExchange.NetGain.WebSockets;
+using uhttpsharp;
+using uhttpsharp.Listeners;
+using uhttpsharp.RequestProviders;
 using Timer = System.Threading.Timer;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Core
 {
     internal class DnmpNodeData
     {
@@ -168,77 +169,17 @@ namespace DnmpWindowsClient
         }
 
         private static volatile bool running;
-
-        private static void WinFormsThread(object _)
-        {
-            var mainNotifyIcon = new NotifyIcon();
-            var iconContextMenu = new ContextMenu();
-
-            var exitMenuItem = new MenuItem
-            {
-                Text = @"Выход",
-            };
-
-            var openGuiMenuItem = new MenuItem
-            {
-                Text = @"Открыть интерфейс",
-            };
-
-            openGuiMenuItem.Click += (o, e) => { Process.Start(new ProcessStartInfo("cmd", $"/c start http://127.0.0.1:{config.WebServerConfig.HttpServerPort}") { CreateNoWindow = true, UseShellExecute = false }); };
-            
-            mainNotifyIcon.DoubleClick += (o, e) => { Process.Start(new ProcessStartInfo("cmd", $"/c start http://127.0.0.1:{config.WebServerConfig.HttpServerPort}") { CreateNoWindow = true, UseShellExecute = false }); };
-
-            exitMenuItem.Click += (o, e) =>
-            {
-                mainNotifyIcon.Visible = false;
-                Application.Exit();
-                Environment.Exit(0);
-                running = false;
-            };
-
-            iconContextMenu.MenuItems.Add(openGuiMenuItem);
-            iconContextMenu.MenuItems.Add(new MenuItem { Text = @"-" });
-            iconContextMenu.MenuItems.Add(exitMenuItem);
-
-            mainNotifyIcon.Text = @"DynNet client";
-            mainNotifyIcon.ContextMenu = iconContextMenu;
-            mainNotifyIcon.Icon = Resources.NotifyIcon;
-
-            mainNotifyIcon.Visible = true;
-
-            Application.Run();
-        }
-        
-        private static readonly Mutex singleInstanceMutex = new Mutex(true, "{f26f7326-ff1e-4138-ba52-f633fcdef7ab}");
         
         private const string configFile = "config.json";
 
         private static readonly DnmpNodeData selfNodeData = new DnmpNodeData();
 
+        private static IDependant dependant;
+
         private static void Main()
         {
-            if (!singleInstanceMutex.WaitOne(TimeSpan.Zero, true))
-            {
-                MessageBox.Show(@"Только один экземпляр приложения может быть запущен!", @"Ошибка",
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
-            }
-
-            using (var identity = WindowsIdentity.GetCurrent())
-            {
-                var principal = new WindowsPrincipal(identity);
-                if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
-                {
-                    MessageBox.Show(@"Для работы TAP-интерфейса требуются права администратора!", @"Ошибка",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    return;
-                }
-            }
-
-            running = true;
-
-            var winFormsThread = new Thread(WinFormsThread);
-            winFormsThread.Start();
+            dependant = new WindowsDependant();
+            dependant.GetRuntime().PreInit();
 
             logger.Info("Starting...");
 
@@ -246,12 +187,19 @@ namespace DnmpWindowsClient
                 config = JsonConvert.DeserializeObject<MainConfig>(File.ReadAllText(configFile));
             File.WriteAllText(configFile, JsonConvert.SerializeObject(config));
 
+
+            dependant.GetRuntime().Init();
+
+            running = true;
+
+            dependant.GetGui().Start(config);
+
             selfNodeData.DomainName = config.TapConfig.SelfName;
 
             networkManager = new NetworkManager(config.NetworksSaveConfig.SaveFile);
             CleanUpVoid(null);
 
-            tapMessageInterface = new TapMessageInterface(config.TapConfig);
+            tapMessageInterface = new TapMessageInterface(config.TapConfig, dependant.GetTapInerface());
 
             dnmpClient = new DnmpClient(tapMessageInterface, new UdpProtocol(), config.ClientConfig);
 
@@ -455,7 +403,7 @@ namespace DnmpWindowsClient
                                     var networkName = requestObject["requestData"]["name"].Value<string>() ??
                                                       "My best network - " + random.Next();
                                     networkManager.AddNetwork(networkName,
-                                        RsaKeyUtils.PrivateKeyToPKCS8(new RsaAsymmetricKey(keySize).KeyParameters));
+                                        RsaKeyUtil.PrivateKeyToPKCS8(new RsaAsymmetricKey(keySize).KeyParameters));
                                     networkManager.SaveNetworks(config.NetworksSaveConfig.SaveFile);
                                     webSocketServer.Broadcast(JsonConvert.SerializeObject(new
                                     {
@@ -476,7 +424,7 @@ namespace DnmpWindowsClient
                                 {
                                     try
                                     {
-                                        var key = Base32.Decode(requestObject["requestData"]["key"].Value<string>());
+                                        var key = Base32Util.Decode(requestObject["requestData"]["key"].Value<string>());
                                         var networkName = requestObject["requestData"]["name"].Value<string>() ??
                                                           "My best network - " + random.Next();
                                         var newNetworkId = networkManager.AddNetwork(networkName, key);
@@ -602,7 +550,7 @@ namespace DnmpWindowsClient
                                 {
                                     try
                                     {
-                                        var inviteCode = Base32.Decode(requestObject["requestData"]["inviteCode"].Value<string>());
+                                        var inviteCode = Base32Util.Decode(requestObject["requestData"]["inviteCode"].Value<string>());
                                         var inviteInfo = networkManager.AcceptInviteCode(inviteCode);
                                         networkManager.SaveNetworks(config.NetworksSaveConfig.SaveFile);
                                         if (networkManager.SavedNetworks.ContainsKey(inviteInfo.Item1))
@@ -648,7 +596,7 @@ namespace DnmpWindowsClient
                                     response = new
                                     {
                                         error = default(string),
-                                        text = Base32.Encode(networkManager.SavedNetworks[networkId].GenerateKeyData())
+                                        text = Base32Util.Encode(networkManager.SavedNetworks[networkId].GenerateKeyData())
                                     };
                                 }
                                 break;
@@ -661,7 +609,7 @@ namespace DnmpWindowsClient
                                         response = new
                                         {
                                             error = default(string),
-                                            text = Base32.Encode(networkManager.SavedNetworks[networkId].GenerateInviteData(maxLength))
+                                            text = Base32Util.Encode(networkManager.SavedNetworks[networkId].GenerateInviteData(maxLength))
                                         };
                                     }
                                     catch (Exception)
@@ -678,15 +626,6 @@ namespace DnmpWindowsClient
                                 {
                                     var newConfig = JsonConvert.DeserializeObject<MainConfig>(requestObject["requestData"]["newConfigJson"].Value<string>());
                                     File.WriteAllText(configFile, JsonConvert.SerializeObject(newConfig));
-                                    var info = new ProcessStartInfo
-                                    {
-                                        Arguments = "/C ping 127.0.0.1 -n 2 && \"" + Application.ExecutablePath + "\"",
-                                        WindowStyle = ProcessWindowStyle.Hidden,
-                                        CreateNoWindow = true,
-                                        FileName = "cmd.exe"
-                                    };
-                                    Process.Start(info);
-                                    Application.Exit();
                                     Environment.Exit(0);
                                 }
                                 break;
@@ -717,6 +656,8 @@ namespace DnmpWindowsClient
             httpServer.Start();
 
             logger.Info($"HTTP server started on http://{config.WebServerConfig.HttpServerIp}:{config.WebServerConfig.HttpServerPort}/");
+
+            dependant.GetRuntime().PostInit();
 
             while (running)
             {

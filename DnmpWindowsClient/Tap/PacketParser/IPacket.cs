@@ -1,6 +1,6 @@
 ﻿using System.IO;
 
-namespace DnmpWindowsClient.PacketParser
+namespace DnmpWindowsClient.Tap.PacketParser
 {
     internal interface IPacket
     {

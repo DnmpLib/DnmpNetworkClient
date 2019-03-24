@@ -4,27 +4,32 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
-using System.Threading.Tasks;
-using Microsoft.Win32;
-using Microsoft.Win32.SafeHandles;
 using System.Net.NetworkInformation;
+using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
+using System.Threading.Tasks;
 using DnmpLibrary.Interaction.MessageInterface;
-using DnmpWindowsClient;
-using DnmpWindowsClient.PacketParser;
+using DnmpWindowsClient.Config;
+using DnmpWindowsClient.Core;
+using DnmpWindowsClient.OSDependant;
+using DnmpWindowsClient.OSDependant.Parts.Tap;
+using DnmpWindowsClient.Tap.PacketParser.Layer2;
+using DnmpWindowsClient.Tap.PacketParser.Layer3;
+using DnmpWindowsClient.Tap.PacketParser.Layer4;
+using DnmpWindowsClient.Tap.PacketParser.Layer7;
+using DnmpWindowsClient.Tap.Util;
+using Microsoft.Win32;
+using Microsoft.Win32.SafeHandles;
 using NLog;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Tap
 {
-    public class TapMessageInterface : MessageInterface
+    internal class TapMessageInterface : MessageInterface
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         private ushort selfId;
-
-        private NetworkInterface tapNetworkInterface;
 
         private readonly byte[] tapIpPrefix;
         private readonly byte[] tapMacPrefix;
@@ -37,8 +42,13 @@ namespace DnmpWindowsClient
 
         private const int ipMacPoolShift = 2;
 
-        public TapMessageInterface(TapConfig tapConfig)
+        private Stream tapStream;
+
+        private readonly ITapInterface tapInterface;
+
+        public TapMessageInterface(TapConfig tapConfig, ITapInterface tapInterface)
         {
+            this.tapInterface = tapInterface;
             tapIpPrefix = tapConfig.IpPrefix.Split('.').Select(byte.Parse).ToArray();
             tapMacPrefix = tapConfig.MacPrefix.Split(':').Select(x => Convert.ToByte(x, 16)).ToArray();
             dnsFormat = tapConfig.DnsFormat;
@@ -49,14 +59,14 @@ namespace DnmpWindowsClient
 
         public PhysicalAddress GetPhysicalAddressFromIp(IPAddress ip)
         {
-            return ip.GetAddressBytes()[2] * 256 + ip.GetAddressBytes()[3] == selfId + ipMacPoolShift ? 
-                tapNetworkInterface.GetPhysicalAddress() : 
+            return ip.GetAddressBytes()[2] * 256 + ip.GetAddressBytes()[3] == selfId + ipMacPoolShift ?
+                tapInterface.GetPhysicalAddress() : 
                 new PhysicalAddress(new [] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], ip.GetAddressBytes()[2], ip.GetAddressBytes()[3] });
         }
 
         public IPAddress GetIpFromPhysicalAddress(PhysicalAddress mac)
         {
-            return Equals(mac, tapNetworkInterface.GetPhysicalAddress()) ? 
+            return Equals(mac, tapInterface.GetPhysicalAddress()) ? 
                 new IPAddress(new [] { tapIpPrefix[0], tapIpPrefix[1], (byte)((selfId + ipMacPoolShift) / 256), (byte)((selfId + ipMacPoolShift) % 256) }) : 
                 new IPAddress(new [] { tapIpPrefix[0], tapIpPrefix[1], mac.GetAddressBytes()[4], mac.GetAddressBytes()[5] });
         }
@@ -70,7 +80,7 @@ namespace DnmpWindowsClient
         {
             if (!mac.GetAddressBytes().Take(4).SequenceEqual(tapMacPrefix))
                 return -ipMacPoolShift;
-            return Equals(mac, tapNetworkInterface.GetPhysicalAddress())
+            return Equals(mac, tapInterface.GetPhysicalAddress())
                 ? selfId
                 : mac.GetAddressBytes()[4] * 256 + mac.GetAddressBytes()[5] - ipMacPoolShift;
         }
@@ -78,7 +88,7 @@ namespace DnmpWindowsClient
         public PhysicalAddress GetPhysicalAddressFromId(int id)
         {
             return id == selfId ?
-                tapNetworkInterface.GetPhysicalAddress() :
+                tapInterface.GetPhysicalAddress() :
                 new PhysicalAddress(new[] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], (byte)((id + ipMacPoolShift) / 256), (byte)((id + ipMacPoolShift) % 256) });
         }
 
@@ -86,44 +96,9 @@ namespace DnmpWindowsClient
         {
             if (initialized)
                 return;
-            using (var identity = WindowsIdentity.GetCurrent())
-            {
-                var principal = new WindowsPrincipal(identity);
-                if (!principal.IsInRole(WindowsBuiltInRole.Administrator))
-                {
-                    logger.Error(
-                        $"Current user ({identity.Name}) has no administrator privileges! TAP-Windows will not be initialized!");
-                    return;
-                }
-            }
-
 
             selfId = newSelfId;
-            var deviceGuid = GetDeviceGuid();
-            if (deviceGuid == null)
-            {
-                logger.Error("Can't find TAP adapter on Windows");
-                return;
-            }
-            tapNetworkInterface = NetworkInterface.GetAllNetworkInterfaces().First(x => x.Name == HumanName(deviceGuid));
-            if (!ClearArpTable())
-            {
-                logger.Error("Error while clearing ARP table");
-                return;
-            }
-            if (!ClearDnsCache())
-            {
-                logger.Error("Error while clearing DNS cache");
-                return;
-            }
-            if (!SetDhcpMethod(HumanName(deviceGuid)))
-                logger.Warn("netsh returned 1 while setting DHCP");
-            logger.Info("TAP interface started");
-            var devicePointer = CreateFile(usermodeDeviceSpace + deviceGuid + ".tap", FileAccess.ReadWrite, FileShare.ReadWrite, 0, FileMode.Open, systemFileAttribute | noBufferingFileFlag | writeThroughFileFlag | overlappedFileFlag, IntPtr.Zero);
-            var statusPointer = Marshal.AllocHGlobal(4);
-            Marshal.WriteInt32(statusPointer, 1);
-            DeviceIoControl(devicePointer, TapControlCode(6, bufferedMethod) /* TAP_IOCTL_SET_MEDIA_STATUS */, statusPointer, 4, statusPointer, 4, out var _, IntPtr.Zero);
-            tapStream = new FileStream(new SafeFileHandle(devicePointer, true), FileAccess.ReadWrite, 1, true);
+            tapStream = tapInterface.Open();
             cancellationTokenSource = new CancellationTokenSource();
             initialized = true;
             StartAsyncReadData(cancellationTokenSource.Token);
@@ -135,9 +110,9 @@ namespace DnmpWindowsClient
             if (!initialized)
                 return;
 
-            initialized = false;
             cancellationTokenSource.Cancel();
-            tapStream.Close();
+            tapInterface.Close();
+            initialized = false;
         }
 
         public override async void PacketReceived(object sender, DataMessageEventArgs eventArgs)
@@ -154,8 +129,8 @@ namespace DnmpWindowsClient
 
             if (!eventArgs.IsBroadcast)
             {
-                ipv4Packet.DestinationAddress = GetIpFromPhysicalAddress(tapNetworkInterface.GetPhysicalAddress());
-                ethernetPacket.DestinationAddress = tapNetworkInterface.GetPhysicalAddress();
+                ipv4Packet.DestinationAddress = GetIpFromPhysicalAddress(tapInterface.GetPhysicalAddress());
+                ethernetPacket.DestinationAddress = tapInterface.GetPhysicalAddress();
             }
 
             var packetData = ethernetPacket.ToBytes();
@@ -168,9 +143,6 @@ namespace DnmpWindowsClient
         {
             return 0xFFFC;
         }
-
-        private const string usermodeDeviceSpace = "\\\\.\\Global\\";
-        private const string networkDevicesClass = "{4D36E972-E325-11CE-BFC1-08002BE10318}";
 
         public async void StartAsyncReadData(CancellationToken cancellationToken)
         {
@@ -305,7 +277,6 @@ namespace DnmpWindowsClient
                                                 }
                                             }
                                         }
-                                        //TODO DNS
                                         continue;
                                 }
                             }
@@ -385,132 +356,6 @@ namespace DnmpWindowsClient
                 GetPhysicalAddressFromId(selfId), answerIpV4Packet, EthernetPacket.PacketType.IpV4);
             var answerData = answerEthernetPacket.ToBytes();
             await tapStream.WriteAsync(answerData, 0, answerData.Length);
-        }
-
-        private static string GetDeviceGuid()
-        {
-            var registryKeyAdapters = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Class\\" + networkDevicesClass, true);
-            if (registryKeyAdapters == null)
-                throw new Exception("Can't open class key");
-            var keyNames = registryKeyAdapters.GetSubKeyNames();
-            var devGuid = default(string);
-            foreach (var x in keyNames)
-            {
-                if (x == "Properties")
-                    continue;
-                var registryKeyAdapter = registryKeyAdapters.OpenSubKey(x);
-                if (registryKeyAdapter == null)
-                    throw new Exception("Can't open adapter key");
-                var id = registryKeyAdapter.GetValue("ComponentId");
-                if (id != null && id.ToString() == "tap0901")
-                    devGuid = registryKeyAdapter.GetValue("NetCfgInstanceId").ToString();
-            }
-            return devGuid;
-        }
-
-        private static string HumanName(string guid)
-        {
-            if (guid == default(string))
-                throw new Exception("Device not found");
-            var registryKeyConnection = Registry.LocalMachine.OpenSubKey("SYSTEM\\CurrentControlSet\\Control\\Network\\" + networkDevicesClass + "\\" + guid + "\\Connection", true);
-            if (registryKeyConnection == null)
-                throw new Exception("Can't open connection key");
-            var id = registryKeyConnection.GetValue("Name");
-            return id?.ToString() ?? "Device not found";
-        }
-
-        private static uint ControlCode(uint deviceType, uint function, uint method, uint access)
-        {
-            return (deviceType << 16) | (access << 14) | (function << 2) | method;
-        }
-
-        private static uint TapControlCode(uint request, uint method)
-        {
-            return ControlCode(unknownFileDevice, request, method, anyAccessFile);
-        }
-
-        private const uint bufferedMethod = 0;
-        private const uint anyAccessFile = 0;
-        private const uint unknownFileDevice = 0x00000022;
-
-        private static FileStream tapStream;
-
-        [DllImport("Kernel32.dll", SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern IntPtr CreateFile(
-            string filename,
-            [MarshalAs(UnmanagedType.U4)]FileAccess fileaccess,
-            [MarshalAs(UnmanagedType.U4)]FileShare fileshare,
-            int securityattributes,
-            [MarshalAs(UnmanagedType.U4)]FileMode creationdisposition,
-            uint flags,
-            IntPtr template);
-
-        private const uint systemFileAttribute = 0x4;
-        private const uint overlappedFileFlag = 0x40000000;
-        private const uint noBufferingFileFlag = 0x20000000;
-        private const uint writeThroughFileFlag = 0x80000000;
-
-        [DllImport("kernel32.dll", ExactSpelling = true, SetLastError = true, CharSet = CharSet.Auto)]
-        private static extern bool DeviceIoControl(IntPtr hDevice, uint dwIoControlCode,
-            IntPtr lpInBuffer, uint nInBufferSize,
-            IntPtr lpOutBuffer, uint nOutBufferSize,
-            out int lpBytesReturned, IntPtr lpOverlapped);
-
-        private static bool SetDhcpMethod(string adapter)
-        {
-            var netshProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "netsh",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    Arguments = $"int ip set address \"{adapter}\" dhcp",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            netshProcess.Start();
-            netshProcess.WaitForExit();
-            return netshProcess.ExitCode == 0;
-        }
-
-        private static bool ClearDnsCache()
-        {
-            var arpProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "ipconfig",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    Arguments = "/flushdns",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            arpProcess.Start();
-            arpProcess.WaitForExit();
-            return arpProcess.ExitCode == 0;
-        }
-
-        private static bool ClearArpTable()
-        {
-            var arpProcess = new Process
-            {
-                StartInfo = new ProcessStartInfo
-                {
-                    FileName = "arp",
-                    CreateNoWindow = true,
-                    UseShellExecute = false,
-                    Arguments = "-d *",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true
-                }
-            };
-            arpProcess.Start();
-            arpProcess.WaitForExit();
-            return arpProcess.ExitCode == 0;
         }
     }
 }

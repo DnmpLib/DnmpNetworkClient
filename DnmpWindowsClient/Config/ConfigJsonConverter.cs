@@ -4,7 +4,7 @@ using DnmpLibrary.Client;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Config
 {
     internal class ConfigJsonConverter : JsonConverter
     {

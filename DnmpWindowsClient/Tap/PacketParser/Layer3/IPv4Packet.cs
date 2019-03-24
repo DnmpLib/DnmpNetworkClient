@@ -2,8 +2,9 @@
 using System.IO;
 using System.Net;
 using DnmpLibrary.Util.BigEndian;
+using DnmpWindowsClient.Tap.PacketParser.Layer4;
 
-namespace DnmpWindowsClient.PacketParser
+namespace DnmpWindowsClient.Tap.PacketParser.Layer3
 {
     // ReSharper disable once InconsistentNaming
     internal sealed class IPv4Packet : IPacket

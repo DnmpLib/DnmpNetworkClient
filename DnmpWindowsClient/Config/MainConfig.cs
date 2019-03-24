@@ -2,7 +2,7 @@
 using System.Linq;
 using DnmpLibrary.Client;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Config
 {
     [ValidableConfig]
     internal class GeneralConfig

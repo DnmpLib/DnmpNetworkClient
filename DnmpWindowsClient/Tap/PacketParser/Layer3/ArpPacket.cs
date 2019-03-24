@@ -1,7 +1,7 @@
 ﻿using System.IO;
 using DnmpLibrary.Util.BigEndian;
 
-namespace DnmpWindowsClient.PacketParser
+namespace DnmpWindowsClient.Tap.PacketParser.Layer3
 {
     internal class ArpPacket : IPacket
     {

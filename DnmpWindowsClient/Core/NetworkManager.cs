@@ -9,16 +9,17 @@ using DnmpLibrary.Interaction.Protocol.EndPointImpl;
 using DnmpLibrary.Security.Cryptography.Asymmetric;
 using DnmpLibrary.Security.Cryptography.Asymmetric.Impl;
 using DnmpLibrary.Util.BigEndian;
+using DnmpWindowsClient.Util;
 using Newtonsoft.Json;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Core
 {
     internal class NetworkManager
     {
         public class SavedNetwork
         {
             [JsonIgnore]
-            public RSAParameters Key => RsaKeyUtils.DecodePrivateKeyInfo(KeyBytes).ExportParameters(true);//RSAKeyUtils.DecodeRSAPrivateKeyToRSAParam(KeyBytes);
+            public RSAParameters Key => RsaKeyUtil.DecodePrivateKeyInfo(KeyBytes).ExportParameters(true);//RSAKeyUtils.DecodeRSAPrivateKeyToRSAParam(KeyBytes);
 
             [JsonIgnore]
             public Guid Id => new Guid(MD5.Create().ComputeHash(Key.Modulus.Concat(Key.Exponent).ToArray()));
@@ -31,7 +32,7 @@ namespace DnmpWindowsClient
             {
                 KeyBytes = keyBytes;
                 Name = name;
-                RsaKeyUtils.DecodeRsaPrivateKeyToRsaParam(KeyBytes);
+                RsaKeyUtil.DecodeRsaPrivateKeyToRsaParam(KeyBytes);
             }
 
             public byte[] GenerateKeyData()

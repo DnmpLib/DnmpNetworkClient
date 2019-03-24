@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace DnmpWindowsClient.PacketParser
+namespace DnmpWindowsClient.Tap.PacketParser
 {
     internal class InvalidPacketException : Exception
     {

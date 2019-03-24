@@ -1,8 +1,9 @@
 ﻿using System.IO;
 using System.Net.NetworkInformation;
 using DnmpLibrary.Util.BigEndian;
+using DnmpWindowsClient.Tap.PacketParser.Layer3;
 
-namespace DnmpWindowsClient.PacketParser
+namespace DnmpWindowsClient.Tap.PacketParser.Layer2
 {
     internal class EthernetPacket : IPacket
     {

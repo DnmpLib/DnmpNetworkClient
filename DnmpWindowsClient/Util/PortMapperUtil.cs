@@ -6,7 +6,7 @@ using LumiSoft.Net.STUN.Client;
 using NLog;
 using Open.Nat;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Util
 {
     internal static class PortMapperUtils
     {

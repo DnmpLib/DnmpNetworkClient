@@ -27,9 +27,9 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Util
 {
-    internal class RsaKeyUtils
+    internal class RsaKeyUtil
     {
 
         #region PUBLIC KEY TO X509 BLOB

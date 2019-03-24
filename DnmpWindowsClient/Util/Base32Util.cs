@@ -21,9 +21,9 @@ using System.Collections.Generic;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Util
 {
-    public static class Base32
+    public static class Base32Util
     {
 
         private static readonly char[] digits;
@@ -32,7 +32,7 @@ namespace DnmpWindowsClient
         private static readonly Dictionary<char, int> charMap = new Dictionary<char, int>();
         private const string separator = "-";
 
-        static Base32()
+        static Base32Util()
         {
             digits = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567".ToCharArray();
             mask = digits.Length - 1;

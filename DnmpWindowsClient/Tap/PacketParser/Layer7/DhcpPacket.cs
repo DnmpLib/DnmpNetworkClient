@@ -7,7 +7,7 @@ using System.Net.NetworkInformation;
 using System.Text;
 using DnmpLibrary.Util.BigEndian;
 
-namespace DnmpWindowsClient.PacketParser
+namespace DnmpWindowsClient.Tap.PacketParser.Layer7
 {
     internal class DhcpPacket : IPacket
     {

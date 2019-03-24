@@ -5,7 +5,7 @@
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
     <ProjectGuid>{1A57D6E7-45A0-403E-A319-B85354F75BC6}</ProjectGuid>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <RootNamespace>DnmpWindowsClient</RootNamespace>
     <AssemblyName>DnmpWindowsClient</AssemblyName>
     <TargetFrameworkVersion>v4.5</TargetFrameworkVersion>
@@ -49,7 +49,7 @@
     <AllowedReferenceRelatedFileExtensions>.pdb;.pri</AllowedReferenceRelatedFileExtensions>
   </PropertyGroup>
   <PropertyGroup>
-    <StartupObject>DnmpWindowsClient.Program</StartupObject>
+    <StartupObject>DnmpWindowsClient.Core.Program</StartupObject>
   </PropertyGroup>
   <PropertyGroup>
     <ApplicationIcon>NotifyIcon.ico</ApplicationIcon>
@@ -86,31 +86,39 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Base32.cs" />
-    <Compile Include="ConfigJsonConverter.cs" />
-    <Compile Include="DomainNameUtil.cs" />
-    <Compile Include="MainConfig.cs" />
-    <Compile Include="MimeTypeHelper.cs" />
-    <Compile Include="NetworkManager.cs" />
-    <Compile Include="PacketParser\ArpPacket.cs" />
-    <Compile Include="PacketParser\DhcpPacket.cs" />
-    <Compile Include="PacketParser\DnsPacket.cs" />
-    <Compile Include="PacketParser\DummyPacket.cs" />
-    <Compile Include="PacketParser\EthernetPacket.cs" />
-    <Compile Include="PacketParser\InvalidPacketException.cs" />
-    <Compile Include="PacketParser\IPv4Packet.cs" />
-    <Compile Include="PacketParser\IPacket.cs" />
-    <Compile Include="PacketParser\UdpPacket.cs" />
-    <Compile Include="PortMapper.cs" />
-    <Compile Include="Program.cs" />
+    <Compile Include="OSDependant\Impl\WindowsDependant.cs" />
+    <Compile Include="OSDependant\Parts\Gui\Impl\WindowsGui.cs" />
+    <Compile Include="OSDependant\Parts\Gui\IGui.cs" />
+    <Compile Include="OSDependant\IDependant.cs" />
+    <Compile Include="OSDependant\Parts\Runtime\Impl\WindowsRuntime.cs" />
+    <Compile Include="OSDependant\Parts\Runtime\IRuntime.cs" />
+    <Compile Include="OSDependant\Parts\Tap\Impl\WindowsTapInterface.cs" />
+    <Compile Include="OSDependant\Parts\Tap\ITapInterface.cs" />
+    <Compile Include="Util\Base32Util.cs" />
+    <Compile Include="Config\ConfigJsonConverter.cs" />
+    <Compile Include="Tap\Util\DomainNameUtil.cs" />
+    <Compile Include="Config\MainConfig.cs" />
+    <Compile Include="Util\MimeTypeHelper.cs" />
+    <Compile Include="Core\NetworkManager.cs" />
+    <Compile Include="Tap\PacketParser\Layer3\ArpPacket.cs" />
+    <Compile Include="Tap\PacketParser\Layer7\DhcpPacket.cs" />
+    <Compile Include="Tap\PacketParser\Layer7\DnsPacket.cs" />
+    <Compile Include="Tap\PacketParser\DummyPacket.cs" />
+    <Compile Include="Tap\PacketParser\Layer2\EthernetPacket.cs" />
+    <Compile Include="Tap\PacketParser\InvalidPacketException.cs" />
+    <Compile Include="Tap\PacketParser\Layer3\IPv4Packet.cs" />
+    <Compile Include="Tap\PacketParser\IPacket.cs" />
+    <Compile Include="Tap\PacketParser\Layer4\UdpPacket.cs" />
+    <Compile Include="Util\PortMapperUtil.cs" />
+    <Compile Include="Core\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Properties\Resources.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
       <DependentUpon>Resources.resx</DependentUpon>
     </Compile>
-    <Compile Include="RsaKeyUtils.cs" />
-    <Compile Include="TapMessageInterface.cs" />
+    <Compile Include="Util\RsaKeyUtil.cs" />
+    <Compile Include="Tap\TapMessageInterface.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
@@ -220,5 +228,6 @@
       <Name>StackExchange.NetGain</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

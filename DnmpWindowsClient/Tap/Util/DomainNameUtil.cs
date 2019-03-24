@@ -1,6 +1,6 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace DnmpWindowsClient
+namespace DnmpWindowsClient.Tap.Util
 {
     internal static class DomainNameUtil
     {

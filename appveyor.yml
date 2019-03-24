@@ -9,7 +9,7 @@ before_build:
 
     choco install nsis -pre
 build:
-  project: DnmpWindowsClient.sln
+  project: DnmpNetworkClient.sln
   verbosity: normal
 after_build:
 - cmd: >-
@@ -17,9 +17,9 @@ after_build:
 
     mkdir output
 
-    cp NSIS/DnmpWindowsClient.Setup.Any.exe output/DnmpWindowsClient.Setup.Any.exe
+    cp NSIS/DnmpNetworkClient.Setup.Any.exe output/DnmpNetworkClient.Setup.Any.exe
 
-    7z a output/DnmpWindowsClient.Any.zip ./DnmpWindowsClient/bin/Release/*
+    7z a output/DnmpNetworkClient.Any.zip ./DnmpNetworkClient/bin/Release/*
 artifacts:
 - path: output\*
   name: main-binaries

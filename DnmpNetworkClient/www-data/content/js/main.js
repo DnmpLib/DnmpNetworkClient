@@ -475,6 +475,7 @@ jQuery(document).ready(function($) {
 		$.post('/api/connecttonetwork', JSON.stringify({
 			requestData: {
 				networkId: window.clientStorage.selectedNetworkId,
+				publicIp: '',
 				sourcePort: $('#network-connect-default-port')[0].checked ? null : $('#network-connect-port').val(),
 				startAsFirst: false,
 				useUpnp: $('#network-connect-use-upnp')[0].checked,

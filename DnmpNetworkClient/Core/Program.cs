@@ -27,8 +27,7 @@ namespace DnmpNetworkClient.Core
 
         private static void Main(string[] args)
         {
-            var platform = Environment.OSVersion.Platform;
-            switch (platform)
+            switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
                 case PlatformID.Win32S:
@@ -48,7 +47,7 @@ namespace DnmpNetworkClient.Core
                     logger.Fatal("Xbox is not supported yet");
                     return;
                 default:
-                    logger.Fatal($"Platform [{platform}] is not supported yet");
+                    logger.Fatal($"Platform [{Environment.OSVersion.Platform}] is not supported yet");
                     return;
             }
             

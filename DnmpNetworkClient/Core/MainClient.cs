@@ -5,7 +5,6 @@ using System.Net;
 using System.Threading.Tasks;
 using DnmpLibrary.Client;
 using DnmpLibrary.Interaction.Protocol.EndPointImpl;
-using DnmpLibrary.Interaction.Protocol.ProtocolImpl;
 using DnmpLibrary.Security.Cryptography.Symmetric.Impl;
 using DnmpNetworkClient.Config;
 using DnmpNetworkClient.Core.SubServers;
@@ -50,7 +49,7 @@ namespace DnmpNetworkClient.Core
 
             NetworkManager = new NetworkManager(Config.NetworksSaveConfig);
             TapMessageInterface = new TapMessageInterface(Config.TapConfig, dependent.GetTapInerface());
-            DnmpClient = new DnmpClient(TapMessageInterface, new UdpProtocol(Config.GeneralConfig.ReceiveBufferSize, Config.GeneralConfig.SendBufferSize),
+            DnmpClient = new DnmpClient(TapMessageInterface, new OsUdpProtocol(Config.GeneralConfig.ReceiveBufferSize, Config.GeneralConfig.SendBufferSize),
                 Config.ClientConfig);
             DnmpClient.OnDisconnected += () => CurrentNetworkId = Guid.Empty;
             DnmpClient.OnConnectionTimeout += () => CurrentNetworkId = Guid.Empty;

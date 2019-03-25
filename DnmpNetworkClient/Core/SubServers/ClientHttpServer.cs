@@ -118,6 +118,9 @@ namespace DnmpNetworkClient.Core.SubServers
                                     var useStun = requestObject["requestData"]["useStun"].Value<bool>();
                                     IPAddress.TryParse(requestObject["requestData"]["publicIp"].Value<string>(), out var publicIp);
 
+
+                                    mainClient.WebSocketServer.BroadcastStatusChange(DnmpClient.ClientStatus
+                                        .Connecting);
                                     try
                                     {
                                         mainClient.Connect(networkId, sourcePort, startAsFirst, publicIp, useUpnp,
@@ -135,8 +138,6 @@ namespace DnmpNetworkClient.Core.SubServers
                                         };
                                     }
 
-                                    mainClient.WebSocketServer.BroadcastStatusChange(DnmpClient.ClientStatus
-                                        .Connecting);
                                     response = new
                                     {
                                         error = default(string)

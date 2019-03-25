@@ -86,17 +86,20 @@ namespace DnmpNetworkClient.Tap
                 new PhysicalAddress(new[] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], (byte)((id + ipMacPoolShift) / 256), (byte)((id + ipMacPoolShift) % 256) });
         }
 
-        public override async void Initialize(ushort newSelfId)
+        public override async Task<bool> Initialize(ushort newSelfId)
         {
             if (initialized)
-                return;
+                return false;
 
             selfId = newSelfId;
             tapStream = tapInterface.Open();
+            if (tapStream == null)
+                return false;
             cancellationTokenSource = new CancellationTokenSource();
             initialized = true;
             StartAsyncReadData(cancellationTokenSource.Token);
             await Task.Delay(0);
+            return true;
         }
 
         public void Stop()

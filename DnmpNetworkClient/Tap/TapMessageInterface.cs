@@ -19,7 +19,7 @@ using NLog;
 
 namespace DnmpNetworkClient.Tap
 {
-    internal class TapMessageInterface : MessageInterface
+    internal class TapMessageInterface : MessageInterface, IDisposable
     {
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
@@ -354,6 +354,12 @@ namespace DnmpNetworkClient.Tap
                 GetPhysicalAddressFromId(selfId), answerIpV4Packet, EthernetPacket.PacketType.IpV4);
             var answerData = answerEthernetPacket.ToBytes();
             await tapStream.WriteAsync(answerData, 0, answerData.Length);
+        }
+
+        public void Dispose()
+        {
+            cancellationTokenSource?.Dispose();
+            tapStream?.Dispose();
         }
     }
 }

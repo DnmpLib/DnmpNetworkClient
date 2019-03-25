@@ -24,6 +24,11 @@ namespace DnmpNetworkClient.Core
                 Thread.Sleep(1);
         }
 
+        private static void RunConsole()
+        {
+
+        }
+
         private static void Main(string[] args)
         {
             switch (Environment.OSVersion.Platform)
@@ -49,7 +54,8 @@ namespace DnmpNetworkClient.Core
                     logger.Fatal($"Platform [{Environment.OSVersion.Platform}] is not supported yet");
                     return;
             }
-            
+
+            dependent.GetRuntime().PreInit();
             logger.Info("Starting...");
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -61,12 +67,44 @@ namespace DnmpNetworkClient.Core
                 logger.Fatal(e.Exception, $"UnobservedTaskException from {e}");
             };
 
-            dependent.GetRuntime().PreInit();
-
             client = new MainClient("config.json", dependent);
             
             if (args.Length == 0)
                 RunDefault();
+            //else
+            //{
+            //    switch (args[0])
+            //    {
+            //        case "networks":
+            //            break;
+            //        case "connect":
+            //            if (args.Length < 2)
+            //            {
+            //                logger.Error(@"Not enough args");
+            //                return;
+            //            }
+
+            //            var networkIdString = args[1];
+            //            if (Guid.TryParse(networkIdString, out var networkId))
+            //            {
+            //                if (client.NetworkManager.SavedNetworks.ContainsKey(networkId))
+            //                {
+
+            //                }
+            //            }
+            //            else
+            //            {
+            //                logger.Error(@"Wrong gui format");
+            //            }
+            //            break;
+            //        case "run":
+            //            RunConsole();
+            //            break;
+            //        default:
+            //            logger.Error(@$"Unknown command '{args[0]}'");
+            //            break;
+            //    }
+            //}
         }
     }
 }

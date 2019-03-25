@@ -15,7 +15,7 @@ using Newtonsoft.Json;
 
 namespace DnmpNetworkClient.Core
 {
-    internal class MainClient
+    internal class MainClient : IDisposable
     {
         public readonly string ConfigFile;
 
@@ -35,7 +35,7 @@ namespace DnmpNetworkClient.Core
 
         private static readonly DnmpNodeData selfNodeData = new DnmpNodeData();
 
-        public bool Running;
+        public volatile bool Running;
 
         public MainClient(string configFile, IDependent dependent)
         {
@@ -120,6 +120,13 @@ namespace DnmpNetworkClient.Core
             WebSocketServer.Start();
             HttpServer.Start();
             Running = true;
+        }
+
+        public void Dispose()
+        {
+            DnmpClient?.Dispose();
+            WebSocketServer?.Dispose();
+            TapMessageInterface?.Dispose();
         }
     }
 

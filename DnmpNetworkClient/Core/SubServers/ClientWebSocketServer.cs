@@ -16,7 +16,7 @@ using StackExchange.NetGain.WebSockets;
 
 namespace DnmpNetworkClient.Core.SubServers
 {
-    internal class ClientWebSocketServer
+    internal class ClientWebSocketServer : IDisposable
     {
         private class ClientJsonData
         {
@@ -275,6 +275,13 @@ namespace DnmpNetworkClient.Core.SubServers
             clientUpdateTimer.Change(Timeout.Infinite, Timeout.Infinite);
             running = false;
             webSocketServer.Stop();
+        }
+
+        public void Dispose()
+        {
+            mainClient?.Dispose();
+            ((IDisposable) webSocketServer)?.Dispose();
+            clientUpdateTimer?.Dispose();
         }
     }
 }

@@ -148,7 +148,7 @@ namespace DnmpNetworkClient.Core.SubServers
                                                     })
                                                     .Select(x => new ClientJsonData(x.Value, mainClient))
                                                 : null,
-                                            mainClient.Config
+                                            config = mainClient.Config
                                         }
                                     }
                                 }, new ConfigJsonConverter()));

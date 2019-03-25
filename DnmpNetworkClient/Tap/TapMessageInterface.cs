@@ -143,11 +143,13 @@ namespace DnmpNetworkClient.Tap
 
         public async void StartAsyncReadData(CancellationToken cancellationToken)
         {
+            logger.Info("TAP started");
             while (!cancellationToken.IsCancellationRequested)
             {
                 try
                 {
                     var buffer = new byte[4096];
+                    
                     var readBytes = await tapStream.ReadAsync(buffer, 0, 4096, cancellationToken);
                     if (readBytes <= 0)
                         continue;
@@ -176,7 +178,6 @@ namespace DnmpNetworkClient.Tap
                                             if (ipPacket.PayloadPacket is UdpPacket udpPacket &&
                                                 udpPacket.PayloadPacket is DhcpPacket dhcpPacket)
                                             {
-
                                                 if (dhcpPacket.Op != 1)
                                                     continue;
 

@@ -90,9 +90,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Core\DnmpNodeData.cs" />
-    <Compile Include="Core\LocalServers\ClientHttpServer.cs" />
-    <Compile Include="Core\LocalServers\ClientWebSocketServer.cs" />
-    <Compile Include="Core\LocalServers\UtilClasses.cs" />
+    <Compile Include="Core\SubServers\ClientHttpServer.cs" />
+    <Compile Include="Core\SubServers\ClientWebSocketServer.cs" />
+    <Compile Include="Core\SubServers\UtilClasses.cs" />
     <Compile Include="Core\MainClient.cs" />
     <Compile Include="OSDependent\Impl\UnixDependent.cs" />
     <Compile Include="OSDependent\Impl\WindowsDependent.cs" />

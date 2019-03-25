@@ -8,7 +8,7 @@ using DnmpLibrary.Interaction.Protocol.EndPointImpl;
 using DnmpLibrary.Interaction.Protocol.ProtocolImpl;
 using DnmpLibrary.Security.Cryptography.Symmetric.Impl;
 using DnmpNetworkClient.Config;
-using DnmpNetworkClient.Core.LocalServers;
+using DnmpNetworkClient.Core.SubServers;
 using DnmpNetworkClient.OSDependent;
 using DnmpNetworkClient.Tap;
 using DnmpNetworkClient.Util;

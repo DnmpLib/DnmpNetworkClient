@@ -1,4 +1,4 @@
-﻿namespace DnmpNetworkClient.Core.LocalServers
+﻿namespace DnmpNetworkClient.Core.SubServers
 {
     internal enum WebGuiEventType
     {

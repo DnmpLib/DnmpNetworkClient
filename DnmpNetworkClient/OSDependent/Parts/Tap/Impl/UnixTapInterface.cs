@@ -75,16 +75,17 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
             var descriptor = Syscall.open("/dev/net/tun", OpenFlags.O_RDWR);
             if (descriptor < 0)
             {
-                logger.Error("/dev/net/tun open error");
+                logger.Error($"/dev/net/tun open error: ret: {descriptor}; LastError: {Marshal.GetLastWin32Error()}");
                 return null;
             }
             currentInterfaceInfo = new IfReq
             {
                 Flags = tapIff | noPiIff
             };
-            if (IoCtl(descriptor, 0x400454CA, ref currentInterfaceInfo) < 0)
+            var ioctlRetCode = IoCtl(descriptor, 0x400454CA, ref currentInterfaceInfo);
+            if (ioctlRetCode < 0)
             {
-                logger.Error("ioctl error");
+                logger.Error($"ioctl error: ret: {ioctlRetCode}; LastError: {Marshal.GetLastWin32Error()}");
                 return null;
             }
             logger.Info($"Opened TAP device with FD #{descriptor} and name '{currentInterfaceInfo.Name}'");

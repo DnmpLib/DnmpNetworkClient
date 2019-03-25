@@ -126,8 +126,15 @@ namespace DnmpNetworkClient.Util
 
         public override void Stop()
         {
-            socket.Shutdown(SocketShutdown.Both);
-            socket.Close();
+            try
+            {
+                socket.Shutdown(SocketShutdown.Both);
+                socket.Close();
+            }
+            catch (Exception)
+            {
+                //ignored
+            }
         }
 
         public override IEndPointFactory GetEndPointFactory()

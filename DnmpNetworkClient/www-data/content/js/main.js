@@ -17,7 +17,7 @@ window.language = {
 	'config-group-GeneralConfig': 'Общие настройки',
 	'config-group-NetworksSaveConfig': 'Настройки сохранения сетей',
 	'config-group-StunConfig': 'Настройки STUN',
-	'config-group-TapConfig': 'Настройки TAP-Windows',
+	'config-group-TapConfig': 'Настройки TAP',
 	'config-group-VisualizationConfig': 'Настройки визуализации',
 	'config-group-WebServerConfig': 'Настройки веб-части',
 	'config-property-ClientConfig-ClientTimeout': 'Таймаут отключения по Heartbeat-у',
@@ -29,11 +29,11 @@ window.language = {
 	'config-property-ClientConfig-PingUpdateTimerDelay': 'Частота отправки PingUpdate-а',
 	'config-property-ClientConfig-PingUpdateTimerStartDelay': 'Задержка отправки PingUpdate-а',
 	'config-property-ClientConfig-RebalancingTimeout': 'Частота ребаланса графа',
-	'config-property-ClientConfig-ReceiveBufferSize': 'Размер буффера приёма',
 	'config-property-ClientConfig-ReconnectionTimeout': 'Таймаут переподключения',
-	'config-property-ClientConfig-SendBufferSize': 'Размер буфера отправки',
 	'config-property-ClientConfig-TokenSize': 'Размер токена подключения',
 	'config-property-ClientConfig-ForcePingUpdateDelay': 'Частота отправки первого PingUpdate-а',
+	'config-property-GeneralConfig-ReceiveBufferSize': 'Размер буффера приём',
+	'config-property-GeneralConfig-SendBufferSize': 'Размер буфера отправки',
 	'config-property-GeneralConfig-DefaultRsaKeySize': 'Стандартный размер RSA ключа',
 	'config-property-NetworksSaveConfig-SaveFile': 'Имя файла сетей',
 	'config-property-NetworksSaveConfig-SavedEndPointTtl': 'Время до удаления клиента',
@@ -477,7 +477,8 @@ jQuery(document).ready(function($) {
 				networkId: window.clientStorage.selectedNetworkId,
 				sourcePort: $('#network-connect-default-port')[0].checked ? null : $('#network-connect-port').val(),
 				startAsFirst: false,
-				useUpnp: $('#network-connect-use-upnp')[0].checked
+				useUpnp: $('#network-connect-use-upnp')[0].checked,
+				useStun: false
 			}
 		}), function(data) {
 			$('#processing-loader').fadeOut('fast', 'swing');

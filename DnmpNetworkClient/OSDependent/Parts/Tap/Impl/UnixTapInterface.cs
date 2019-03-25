@@ -1,4 +1,5 @@
 ﻿using System.IO;
+using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using Mono.Unix.Native;
@@ -26,12 +27,13 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
 
         private IfReq currentInterfaceInfo;
         private Stream currentStream;
+        private PhysicalAddress currentPhysicalAddress;
 
         private readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public PhysicalAddress GetPhysicalAddress()
         {
-            return new PhysicalAddress(new byte[6]);
+            return currentPhysicalAddress;
         }
 
         public Stream Open()
@@ -53,6 +55,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
                 return null;
             }
             logger.Info($"Opened TAP device with FD #{descriptor} and name '{currentInterfaceInfo.Name}'");
+            currentPhysicalAddress = NetworkInterface.GetAllNetworkInterfaces().First(x => x.Description == currentInterfaceInfo.Name).GetPhysicalAddress();
             return currentStream = new UnixStream(descriptor);
         }
 

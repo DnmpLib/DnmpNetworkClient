@@ -101,6 +101,7 @@
     <Compile Include="OSDependent\Parts\Gui\IGui.cs" />
     <Compile Include="OSDependent\IDependent.cs" />
     <Compile Include="OSDependent\Parts\Runtime\DummyRuntime.cs" />
+    <Compile Include="OSDependent\Parts\Runtime\Impl\UnixRuntime.cs" />
     <Compile Include="OSDependent\Parts\Runtime\Impl\WindowsRuntime.cs" />
     <Compile Include="OSDependent\Parts\Runtime\IRuntime.cs" />
     <Compile Include="OSDependent\Parts\Tap\Impl\UnixTapInterface.cs" />

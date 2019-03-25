@@ -66,9 +66,9 @@ namespace DnmpNetworkClient.Util
                 case PlatformID.Unix:
                 case PlatformID.MacOSX:
                 case PlatformID.Xbox:
-                    return;
+                    break;
                 default:
-                    return;
+                    throw new Exception("unknown platform");
             }
             socket.ReceiveBufferSize = receiveBufferSize;
             socket.SendBufferSize = sendBufferSize;

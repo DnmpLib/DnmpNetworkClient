@@ -121,6 +121,7 @@
     <Compile Include="Tap\PacketParser\Layer3\IPv4Packet.cs" />
     <Compile Include="Tap\PacketParser\IPacket.cs" />
     <Compile Include="Tap\PacketParser\Layer4\UdpPacket.cs" />
+    <Compile Include="Util\OsUdpProtocol.cs" />
     <Compile Include="Util\PortMapperUtil.cs" />
     <Compile Include="Core\Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

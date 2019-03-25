@@ -17,7 +17,6 @@ namespace DnmpNetworkClient.Core
 
         private static void RunDefault()
         {
-            dependent.GetRuntime().PreInit();
             dependent.GetGui().Start(client.Config);
             dependent.GetRuntime().PostInit();
             client.StartServers();
@@ -62,8 +61,10 @@ namespace DnmpNetworkClient.Core
                 logger.Fatal(e.Exception, $"UnobservedTaskException from {e}");
             };
 
-            client = new MainClient("config.json", dependent);
+            dependent.GetRuntime().PreInit();
 
+            client = new MainClient("config.json", dependent);
+            
             if (args.Length == 0)
                 RunDefault();
         }

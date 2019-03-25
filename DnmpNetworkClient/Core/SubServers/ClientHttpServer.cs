@@ -16,7 +16,7 @@ using uhttpsharp;
 using uhttpsharp.Listeners;
 using uhttpsharp.RequestProviders;
 
-namespace DnmpNetworkClient.Core.LocalServers
+namespace DnmpNetworkClient.Core.SubServers
 {
     internal class ClientHttpServer
     {
@@ -51,11 +51,11 @@ namespace DnmpNetworkClient.Core.LocalServers
                         var requestObject = JObject.Parse(Encoding.UTF8.GetString(context.Request.Post.Raw));
                         switch (endPoint)
                         {
-                            case "getwebsocket":
+                            case "getwebsocketport":
                                 {
                                     response = new
                                     {
-                                        address = $"ws://127.0.0.1:{mainClient.Config.WebServerConfig.WebSocketServerPort}"
+                                        port = mainClient.Config.WebServerConfig.WebSocketServerPort
                                     };
                                 }
                                 break;

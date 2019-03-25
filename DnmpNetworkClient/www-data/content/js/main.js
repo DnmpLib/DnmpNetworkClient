@@ -554,8 +554,8 @@ jQuery(document).ready(function($) {
 
 	updateDevModeElements();
 
-	$.post('/api/getwebsocket', JSON.stringify({}), function(data) {
-		window.clientStorage.webSocketAddress = data.address;
+	$.post('/api/getwebsocketport', JSON.stringify({}), function(data) {
+		window.clientStorage.webSocketAddress = 'ws://' + location.hostname + ':' + data.port;
 		reinitWebSocket();
 	});
 });

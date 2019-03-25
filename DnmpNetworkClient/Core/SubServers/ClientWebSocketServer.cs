@@ -14,7 +14,7 @@ using NLog;
 using StackExchange.NetGain;
 using StackExchange.NetGain.WebSockets;
 
-namespace DnmpNetworkClient.Core.LocalServers
+namespace DnmpNetworkClient.Core.SubServers
 {
     internal class ClientWebSocketServer
     {

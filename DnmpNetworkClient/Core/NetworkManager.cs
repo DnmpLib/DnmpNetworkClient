@@ -21,7 +21,7 @@ namespace DnmpNetworkClient.Core
         public class SavedNetwork
         {
             [JsonIgnore]
-            public RSAParameters Key => RsaKeyUtil.DecodePrivateKeyInfo(KeyBytes).ExportParameters(true);//RSAKeyUtils.DecodeRSAPrivateKeyToRSAParam(KeyBytes);
+            public RSAParameters Key => RsaKeyUtil.DecodePrivateKeyInfo(KeyBytes).ExportParameters(true);
 
             [JsonIgnore]
             public Guid Id => new Guid(MD5.Create().ComputeHash(Key.Modulus.Concat(Key.Exponent).ToArray()));
@@ -44,13 +44,13 @@ namespace DnmpNetworkClient.Core
 
             public byte[] GenerateInviteData(int maxLength)
             {
-                if (maxLength < 18)
+                if (maxLength < 16)
                     throw new ArgumentException(@"maxLength should be at least 18", nameof(maxLength));
                 var memoryStream = new MemoryStream();
                 var binaryWriter = new BigEndianBinaryWriter(memoryStream);
                 var allEndPoints = SavedIpEndPoints.Select(x => x.Key).Select(Convert.FromBase64String).OrderBy(x => x.Length).ThenBy(x => Guid.NewGuid()).ToList(); // magic random shuffle
                 var needCount = 0;
-                var totalLength = 18;
+                var totalLength = 16;
                 while (totalLength < maxLength && needCount < allEndPoints.Count)
                 {
                     totalLength += allEndPoints[needCount].Length + 2;
@@ -58,7 +58,6 @@ namespace DnmpNetworkClient.Core
                 }
                 var inviteEndPoints = allEndPoints.Take(needCount).ToList();
                 binaryWriter.Write(Id.ToByteArray());
-                binaryWriter.Write(inviteEndPoints.Count);
                 foreach (var endPoint in inviteEndPoints)
                 {
                     binaryWriter.Write((ushort) endPoint.Length);
@@ -126,9 +125,8 @@ namespace DnmpNetworkClient.Core
         {
             var binaryReader = new BigEndianBinaryReader(new MemoryStream(inviteCode));
             var networkId = new Guid(binaryReader.ReadBytes(16));
-            var endPointCount = binaryReader.ReadInt32();
             var endPoints = new List<byte[]>();
-            for (var i = 0; i < endPointCount; i++)
+            while (binaryReader.BaseStream.Length != binaryReader.BaseStream.Position)
                 endPoints.Add(binaryReader.ReadBytes(binaryReader.ReadUInt16()));
             return new Tuple<Guid, List<byte[]>>(networkId, endPoints);
         }

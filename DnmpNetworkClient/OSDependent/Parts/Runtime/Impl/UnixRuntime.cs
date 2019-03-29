@@ -18,7 +18,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Runtime.Impl
         {
             var descriptor = Syscall.open("/dev/net/tun", OpenFlags.O_RDWR);
             
-            if (descriptor >= 0)
+            if (descriptor < 0)
             {
                 logger.Error("/dev/net/tun open error! Check availability of TAP/TUN!");
                 Environment.Exit(0);

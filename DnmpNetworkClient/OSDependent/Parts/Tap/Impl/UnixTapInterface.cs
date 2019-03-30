@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
@@ -30,7 +31,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
         private Stream currentStream;
         private PhysicalAddress currentPhysicalAddress;
 
-        private readonly Logger logger = LogManager.GetCurrentClassLogger();
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
         public PhysicalAddress GetPhysicalAddress()
         {
@@ -57,11 +58,33 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
             }
             currentPhysicalAddress = NetworkInterface.GetAllNetworkInterfaces().First(x => x.Description == currentInterfaceInfo.Name).GetPhysicalAddress();
             logger.Info($"Opened TAP device: FD #{descriptor}; Name '{currentInterfaceInfo.Name}'; HW address: {currentPhysicalAddress}");
+            RenewDhcp(currentInterfaceInfo.Name);
             currentStream = new RawUnixStream(descriptor);
-            
             return currentStream;
         }
-        
+
+        private static void RenewDhcp(string interfaceName)
+        {
+            var dhclientProcess = new Process
+            {
+                StartInfo = new ProcessStartInfo
+                {
+                    FileName = "dhclient",
+                    CreateNoWindow = true,
+                    UseShellExecute = false,
+                    Arguments = interfaceName,
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true
+                }
+            };
+            dhclientProcess.Start();
+            logger.Debug("dhclient started!");
+            dhclientProcess.Exited += (o, e) =>
+            {
+                logger.Debug($"dhclient exited! Exit code: {dhclientProcess.ExitCode}");
+            };
+        }
+
         private sealed class RawUnixStream : Stream, IDisposable
         {
             private const int invalidFileDescriptor = -1;

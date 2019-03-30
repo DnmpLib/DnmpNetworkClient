@@ -210,6 +210,12 @@
     <Content Include="www-data\content\js\popper.min.js">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="www-data\front\en.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="www-data\front\ru.html">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Content Include="www-data\index.html">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>

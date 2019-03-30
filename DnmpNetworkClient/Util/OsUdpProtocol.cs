@@ -95,6 +95,10 @@ namespace DnmpNetworkClient.Util
                 {
                     return;
                 }
+                catch (InvalidOperationException)
+                {
+                    return;
+                }
                 catch (Exception e)
                 {
                     logger.Error(e, "Exception in EndReceiveFrom");
@@ -114,6 +118,10 @@ namespace DnmpNetworkClient.Util
                     break;
                 }
                 catch (ObjectDisposedException)
+                {
+                    return;
+                }
+                catch (InvalidOperationException)
                 {
                     return;
                 }

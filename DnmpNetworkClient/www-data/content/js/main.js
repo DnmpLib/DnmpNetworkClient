@@ -93,7 +93,7 @@ function updateClientRow(id, data) {
 				.html(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>')
 			).append(
 				$('<td>').attr('id', 'connected-client-' + id + '-ping')
-				.text(data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text'])
+				.text(data.ping == 65534 ? 'N/A' : (data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text']))
 			).append(
 				$('<td>').attr('id', 'connected-client-' + id + '-bytes-received')
 				.text(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived)
@@ -118,7 +118,7 @@ function updateClientRow(id, data) {
 		$('#connected-client-' + id + '-internal-ip').updateText(data.internalIp);
 		$('#connected-client-' + id + '-internal-domain').updateText(data.internalDomain);
 		$('#connected-client-' + id + '-direct-connection').updateHtml(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>');
-		$('#connected-client-' + id + '-ping').updateText(data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text']);
+		$('#connected-client-' + id + '-ping').updateText(data.ping == 65534 ? 'N/A' : (data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text']));
 		$('#connected-client-' + id + '-bytes-received').updateText(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived);
 		$('#connected-client-' + id + '-bytes-sent').updateText(data.id == window.clientStorage.selfId ? "-" : data.bytesSent);
 		$('#connected-client-' + id + '-data-bytes-received').updateText(data.id == window.clientStorage.selfId ? "-" : data.dataBytesReceived);

@@ -112,17 +112,17 @@ function updateClientRow(id, data) {
 		$('#clients-count').text($('#clients-table-content tr').length - 1);
 		updateDevModeElements();
 	} else {
-		$('#connected-client-' + id + '-id').text(data.id);
-		$('#connected-client-' + id + '-parent-id').text(data.parentId == 65535 ? "-" : data.parentId);
-		$('#connected-client-' + id + '-public-ipport').text(data.publicIpPort);
-		$('#connected-client-' + id + '-internal-ip').text(data.internalIp);
-		$('#connected-client-' + id + '-internal-domain').text(data.internalDomain);
-		$('#connected-client-' + id + '-direct-connection').html(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>');
-		$('#connected-client-' + id + '-ping').text(data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text']);
-		$('#connected-client-' + id + '-bytes-received').text(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived);
-		$('#connected-client-' + id + '-bytes-sent').text(data.id == window.clientStorage.selfId ? "-" : data.bytesSent);
-		$('#connected-client-' + id + '-data-bytes-received').text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesReceived);
-		$('#connected-client-' + id + '-data-bytes-sent').text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesSent);
+		$('#connected-client-' + id + '-id').updateText(data.id);
+		$('#connected-client-' + id + '-parent-id').updateText(data.parentId == 65535 ? "-" : data.parentId);
+		$('#connected-client-' + id + '-public-ipport').updateText(data.publicIpPort);
+		$('#connected-client-' + id + '-internal-ip').updateText(data.internalIp);
+		$('#connected-client-' + id + '-internal-domain').updateText(data.internalDomain);
+		$('#connected-client-' + id + '-direct-connection').updateHtml(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>');
+		$('#connected-client-' + id + '-ping').updateText(data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text']);
+		$('#connected-client-' + id + '-bytes-received').updateText(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived);
+		$('#connected-client-' + id + '-bytes-sent').updateText(data.id == window.clientStorage.selfId ? "-" : data.bytesSent);
+		$('#connected-client-' + id + '-data-bytes-received').updateText(data.id == window.clientStorage.selfId ? "-" : data.dataBytesReceived);
+		$('#connected-client-' + id + '-data-bytes-sent').updateText(data.id == window.clientStorage.selfId ? "-" : data.dataBytesSent);
 	}
 }
 
@@ -155,9 +155,9 @@ function updateNetworkRow(data) {
 			updateNetworkControlButtons();
 		});
 	} else {
-		$('#network-' + id + '-id').text(data.id);
-		$('#network-' + id + '-name').text(data.name);
-		$('#network-' + id + '-saved-clients-count').text(data.savedClients);
+		$('#network-' + id + '-id').updateText(data.id);
+		$('#network-' + id + '-name').updateText(data.name);
+		$('#network-' + id + '-saved-clients-count').updateText(data.savedClients);
 	}
 }
 
@@ -290,6 +290,16 @@ function reinitWebSocket() {
 }
 
 jQuery(document).ready(function($) {
+	$.fn.updateText = function(newText) {
+		if (this.text() != newText)
+			this.text(newText);
+	};
+
+	$.fn.updateHtml = function(newHtml) {
+		if (this.html() != newHtml)
+			this.html(newHtml);
+	};
+
 	$('.sidebar-button').click(function() {
 		$('.sidebar-button').removeClass('sidebar-button-active');
 		$(this).addClass('sidebar-button-active');

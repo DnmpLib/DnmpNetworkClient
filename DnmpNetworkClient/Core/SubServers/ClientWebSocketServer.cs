@@ -178,6 +178,7 @@ namespace DnmpNetworkClient.Core.SubServers
                 mainClient.NetworkManager.AddEndPoint(mainClient.CurrentNetworkId, (RealIPEndPoint)mainClient.DnmpClient.ClientsById[clientId].EndPoint);
                 mainClient.NetworkManager.SaveNetworks();
                 BroadcastClientConnect(mainClient.DnmpClient.ClientsById[clientId]);
+                BroadcastNetworkList();
             };
 
             mainClient.DnmpClient.OnClientDisconnected += BroadcastClientDisconnect;

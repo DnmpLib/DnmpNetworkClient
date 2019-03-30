@@ -1,0 +1,401 @@
+﻿<html>
+    <head>
+        <title>DNMP Client WebUI</title>
+        <link rel="stylesheet" href="/content/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/content/css/style.css"/>
+        <link rel="stylesheet" href="/content/css/icons.min.css"/>
+        <link rel="stylesheet" href="/content/css/animate.css"/>
+        <link rel="shortcut icon" href="/content/favicon.ico" type="image/x-icon"/>
+        <script type="text/javascript">
+            window.language = {
+                'client-state-0': 'Не подключено',
+                'client-state-2': 'Подключение',    
+                'client-state-1': 'Подключено',
+                'client-state-3': 'Соединение',
+                'client-state-4': 'Отключение',
+                'client-state-message-disconnected': 'Отключён от сети (подключение не удалось)',
+                'client-state-message-connected': 'Подключено',
+                'client-state-message-connecting': 'Подключение',
+                'ping-ms-text': 'мс',
+                'creating-network-front-status': 'Создание сети...',
+                'processing-invite-code-front-status': 'Обработка инвайт-кода...',
+                'generating-network-key-front-status': 'Генерация ключ-кода сети...',
+                'generating-invite-code-front-status': 'Генерация инвайт-кода...',
+                'removing-network-front-status': 'Удаление сети...',
+                'connecting-front-status': 'Подключение...',
+                'saving-config-front-status': 'Сохранение настроек...',
+                'stun-connection-error': 'Ошибка STUN при определении внещнего IP/порта. Попробуйте вручную сделать проброс порта или обратится к администратору сети.',
+                'generic-connection-error': 'Ошибка при обработке подключения',
+                'invite-code-generated-message': 'Инвайт-код сгенерирован успешно',
+                'network-key-generated-message': 'Ключ-код сгенерирован успешно',
+                'invite-code-added-text': 'В сеть с ID {0} успешно добавлено {1} клиентов',
+                'invite-code-wrong-format-error': 'Некорректный формат инвайт-кода',
+                'invite-code-network-not-found-error': 'Сеть с таким ID ({0}) не существует',
+                'network-key-wrong-format-error': 'Некорректный формат ключ-кода сети',
+                'network-key-network-exists-error': 'Сеть с таким ID ({0}) уже добавлена',
+                'network-key-added-message': 'Сеть была успешно добавлена. ID: {0}',
+                'network-removed-message': 'Сеть успешно удалена',
+                'network-created-message': 'Сеть успешно создана',
+                'config-group-ClientConfig': 'Настройки DNMP',
+                'config-group-GeneralConfig': 'Общие настройки',
+                'config-group-NetworksSaveConfig': 'Настройки сохранения сетей',
+                'config-group-StunConfig': 'Настройки STUN',
+                'config-group-TapConfig': 'Настройки TAP',
+                'config-group-VisualizationConfig': 'Настройки визуализации',
+                'config-group-WebServerConfig': 'Настройки веб-части',
+                'config-property-ClientConfig-ClientTimeout': 'Таймаут отключения по Heartbeat-у',
+                'config-property-ClientConfig-ConnectionTimeout': 'Таймаут подключения',
+                'config-property-ClientConfig-HeartbeatDelay': 'Частота отправки Heartbeat-ов',
+                'config-property-ClientConfig-MaxPingAnswerTime': 'Таймаут приёма пинга от клиента',
+                'config-property-ClientConfig-MaxReliableRetries': 'Максимальное число попыток отправить сообщение с контролем доставки',
+                'config-property-ClientConfig-PingSize': 'Размер пинга',
+                'config-property-ClientConfig-PingUpdateTimerDelay': 'Частота отправки PingUpdate-а',
+                'config-property-ClientConfig-PingUpdateTimerStartDelay': 'Задержка отправки PingUpdate-а',
+                'config-property-ClientConfig-RebalancingTimeout': 'Частота ребаланса графа',
+                'config-property-ClientConfig-ReconnectionTimeout': 'Таймаут переподключения',
+                'config-property-ClientConfig-TokenSize': 'Размер токена подключения',
+                'config-property-ClientConfig-ForcePingUpdateDelay': 'Частота отправки первого PingUpdate-а',
+                'config-property-GeneralConfig-ReceiveBufferSize': 'Размер буффера приёма',
+                'config-property-GeneralConfig-SendBufferSize': 'Размер буфера отправки',
+                'config-property-GeneralConfig-DefaultRsaKeySize': 'Стандартный размер RSA ключа',
+                'config-property-NetworksSaveConfig-SaveFile': 'Имя файла сетей',
+                'config-property-NetworksSaveConfig-SavedEndPointTtl': 'Время до удаления клиента',
+                'config-property-NetworksSaveConfig-SavedEndPointsCleanUpInterval': 'Частота очистки клиентов',
+                'config-property-StunConfig-Host': 'Хост STUN',
+                'config-property-StunConfig-Port': 'Порт STUN',
+                'config-property-StunConfig-PortMappingTimeout': 'Таймаут UPnP/PMP',
+                'config-property-StunConfig-PunchPort': 'Стандартный исходящий порт',
+                'config-property-TapConfig-SelfName': 'Текущее доменное имя',
+                'config-property-TapConfig-IpPrefix': 'Префикс IP адреса',
+                'config-property-TapConfig-MacPrefix': 'Префикс MAC адреса',
+                'config-property-TapConfig-DnsFormat': 'Формат доменов внутри сети',
+                'config-property-VisualizationConfig-ServerIp': 'IP сервера визуализации',
+                'config-property-VisualizationConfig-ServerPort': 'Порт сервера визуализации',
+                'config-property-WebServerConfig-HttpServerIp': 'Внешний IP веб-части',
+                'config-property-WebServerConfig-HttpServerPort': 'Внешний порт HTTP сервера',
+                'config-property-WebServerConfig-WebSocketServerPort': 'Внешний порт WS сервера',
+                'config-property-WebServerConfig-WebSocketTimeout': 'Таймаут подключения к WS'
+            };
+        </script>
+    </head>
+    <body>
+        <div id="start-bg-loader"><div class="spinner"></div><div id="current-status">Подключение к клиенту...</div></div>
+        <div class="row-main" id="row-main" style="display: none">
+            <div class="sidebar">
+                <div class="sidebar-logo">DNMP</div>
+                <button class="sidebar-button sidebar-button-active" data-content-id="status"><i class="fas fa-info-circle"></i> Состояние</button>
+                <button class="sidebar-button" data-content-id="networks"><i class="fas fa-network-wired"></i> Сети</button>
+                <button class="sidebar-button" data-content-id="client-settings"><i class="fas fa-wrench"></i> Настройки клиента</button>
+                <div id="dev-mode-checkbox-block">
+                    <input type="checkbox" id="dev-mode">
+                    <label for="dev-mode">Режим разработчика</label>
+                </div>
+            </div>
+            <div class="content-main">
+                <div class="content-part" id="content-part-status">
+                    <h1>Текущее состояние: <span id="client-state-text">N/A</span></h1>  
+                    <br/>
+                    <div id="clients-table-content">
+                        <h2>Клиенты (<span id="clients-count">0</span>):</h2>
+                        <br/>
+                        <table class="table table-hover" id="clients-table">
+                            <tr>
+                                <th>ID</th>
+                                <th class="dev-mode">ID предка</th>
+                                <th class="dev-mode">Удалённый IP:Порт</th>
+                                <th class="dev-mode">Внутренний IP</th>
+                                <th>Внутренний домен</th>
+                                <th>Прямое соединение</th>
+                                <th>Задержка</th>
+                                <th>Байт принято</th>
+                                <th>Байт передано</th>
+                                <th class="dev-mode">Байт данных принято</th>
+                                <th class="dev-mode">Байт данных передано</th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-part" id="content-part-networks">
+                    <h2>Сети</h2>
+                    <hr>
+                    <div style="margin-bottom: 20px" class="clearfix">
+                        <div style="float: left">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-primary" id="button-create-network" data-toggle="modal" data-target="#network-create-modal">Создать сеть</button>
+                                <button class="btn btn-primary" id="button-add-network" data-toggle="modal" data-target="#network-add-network-modal">Добавить сеть по ключ-коду</button>
+                                <button class="btn btn-primary" id="button-accept-invite-code" data-toggle="modal" data-target="#network-accept-invitation-modal">Ввести инвайт-код</button>
+                            </div>
+                        </div>
+                        <div style="float: right">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-success" id="button-network-generate-key-code" disabled="">Сгенерировать ключ-код</button>
+                                <button class="btn btn-success" id="button-network-generate-invite-code" disabled="">Сгенерировать инвайт-код</button>
+                            </div>
+                            <button class="btn btn-warning" id="button-network-generate-disconnect" style="display: none">Отключиться</button>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-warning" id="button-network-generate-connect" disabled="" data-toggle="modal" data-target="#network-connect-modal">Подключиться</button>
+                                <button class="btn btn-warning" id="button-network-generate-start" disabled="" data-toggle="modal" data-target="#network-start-modal">Запустить сеть</button>
+                            </div>
+                            <button class="btn btn-danger" id="button-network-generate-remove" disabled="">Удалить сеть</button>
+                        </div>
+                    </div>
+                    <table class="table table-hover" id="networks-table">
+                        <tr>
+                            <th style="width: 20%">ID</th>
+                            <th>Имя</th>
+                            <th>Сохранённых клиентов</th>
+                        </tr>
+                    </table>
+                </div>
+                <div class="content-part" id="content-part-client-settings">
+                    <h2>Настройки клиента</h2>
+                    <span class="text-danger">Изменяйте настройки на свой страх и риск, т.к. после изменения запуск может быть невозможен!</span>
+                    <hr>
+                    <div id="client-settings-list">
+                    </div>
+                    <button class="btn btn-primary" id="save-client-config">Сохранить настройки клиента</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-create-modal" tabindex="-1" role="dialog" aria-labelledby="network-create-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-create-modal-label">Создание новой сети</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-4 col-form-label">Имя сети:</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="network-create-name" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-4 col-form-label">Размер ключа:</label>
+                            <div class="col-sm-8">
+                                <select class="form-control" id="network-create-key-size">
+                                    <option value="">Стандартный</option>
+                                    <option value="512">512</option>
+                                    <option value="1024">1024</option>
+                                    <option value="2048">2048</option>
+                                    <option value="3072">3072</option>
+                                    <option value="4096">4096</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="network-create-modal-button">Создать</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-connect-modal" tabindex="-1" role="dialog" aria-labelledby="network-connect-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-connect-modal-label">Подключение к сети</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-3 col-form-label">Исходящий порт:</label>
+                            <div class="col-sm-5">
+                                <input type="number" id="network-connect-port" class="form-control" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="checkbox" id="network-connect-default-port" checked>
+                                <label for="network-connect-default-port">Использовать стандартный</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-12">
+                                <input type="checkbox" id="network-connect-use-upnp" checked>
+                                <label for="network-connect-use-upnp">Использовать UPnP/PMP</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="network-connect-modal-button">Подключится</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-start-modal" tabindex="-1" role="dialog" aria-labelledby="network-start-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-start-modal-label">Запуск сети</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-3 col-form-label">Исходящий порт:</label>
+                            <div class="col-sm-5">
+                                <input type="number" id="network-start-port" class="form-control" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="checkbox" id="network-start-default-port" checked>
+                                <label for="network-start-default-port">Использовать стандартный</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-3 col-form-label">Внешний IP:</label>
+                            <div class="col-sm-5">
+                                <input type="text" id="network-start-ip" class="form-control" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="checkbox" id="network-start-use-stun" checked>
+                                <label for="network-start-use-stun">Использовать STUN</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-12">
+                                <input type="checkbox" id="network-start-use-upnp" checked>
+                                <label for="network-start-use-upnp">Использовать UPnP/PMP</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="network-start-modal-button">Запустить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-add-network-modal" tabindex="-1" role="dialog" aria-labelledby="network-add-network-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-add-network-modal-label">Добавление сети по ключ-коду</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-4 col-form-label">Имя сети:</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="network-add-network-name" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="key-size-select" class="form-label">Ключ-код:</label>
+                            <textarea id="network-add-network-key-code"class="form-control" style="min-height: 500px"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="network-add-network-modal-button">Добавить</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-accept-invitation-modal" tabindex="-1" role="dialog" aria-labelledby="network-accept-invitation-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-accept-invitation-modal-label">Ввод инвайт-кода</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="key-size-select" class="form-label">Инвайт-код:</label>
+                            <textarea id="network-accept-invitation-invite-code" class="form-control" style="min-height: 500px"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="network-accept-invitation-modal-button">Ввести</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade" id="network-generate-key-code-output-modal" tabindex="-1" role="dialog" aria-labelledby="network-generate-key-code-output-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-generate-key-code-output-modal-label">Ключ-код</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="key-code-output">
+                            KEYCODEDATA
+                        </pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-generate-invite-code-output-modal" tabindex="-1" role="dialog" aria-labelledby="network-generate-invite-code-modal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-generate-invite-code-modal">Инвайт-код</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="invite-code-output">
+                            INVITECODEDATA
+                        </pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="save-config-modal" tabindex="-1" role="dialog" aria-labelledby="save-config-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="save-config-modal-label">Сохранение настроек</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h5><span class="text-danger">Внимание! При сохранении настроек текущее соединение прервётся и программа закроется. При неправильнй настройке запуск программы может не произойти!</span></h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="save-config-modal-button">Сохранить и закрыть</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="processing-loader" style="display: none"><div class="spinner spinner-white"></div><div id="processing-status"></div></div>
+
+        <script src="/content/js/jquery.min.js"></script>
+        <script src="/content/js/popper.min.js"></script>
+        <script src="/content/js/bootstrap.min.js"></script>
+        <script src="/content/js/bootstrap-notify.min.js"></script>
+        <script src="/content/js/main.js"></script>
+    </body>
+</html>

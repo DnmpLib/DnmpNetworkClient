@@ -7,53 +7,6 @@ $.fn.extend({
 }
 });
 
-window.language = {
-	'client-state-0': 'Не подключено',
-	'client-state-2': 'Подключение',	
-	'client-state-1': 'Подключено',
-	'client-state-3': 'Соединение',
-	'client-state-4': 'Отключение',
-	'config-group-ClientConfig': 'Настройки Dnmp',
-	'config-group-GeneralConfig': 'Общие настройки',
-	'config-group-NetworksSaveConfig': 'Настройки сохранения сетей',
-	'config-group-StunConfig': 'Настройки STUN',
-	'config-group-TapConfig': 'Настройки TAP',
-	'config-group-VisualizationConfig': 'Настройки визуализации',
-	'config-group-WebServerConfig': 'Настройки веб-части',
-	'config-property-ClientConfig-ClientTimeout': 'Таймаут отключения по Heartbeat-у',
-	'config-property-ClientConfig-ConnectionTimeout': 'Таймаут подключения',
-	'config-property-ClientConfig-HeartbeatDelay': 'Частота отправки Heartbeat-ов',
-	'config-property-ClientConfig-MaxPingAnswerTime': 'Таймаут приёма пинга от клиента',
-	'config-property-ClientConfig-MaxReliableRetries': 'Максимальное число попыток отправить сообщение с контролем доставки',
-	'config-property-ClientConfig-PingSize': 'Размер пинга',
-	'config-property-ClientConfig-PingUpdateTimerDelay': 'Частота отправки PingUpdate-а',
-	'config-property-ClientConfig-PingUpdateTimerStartDelay': 'Задержка отправки PingUpdate-а',
-	'config-property-ClientConfig-RebalancingTimeout': 'Частота ребаланса графа',
-	'config-property-ClientConfig-ReconnectionTimeout': 'Таймаут переподключения',
-	'config-property-ClientConfig-TokenSize': 'Размер токена подключения',
-	'config-property-ClientConfig-ForcePingUpdateDelay': 'Частота отправки первого PingUpdate-а',
-	'config-property-GeneralConfig-ReceiveBufferSize': 'Размер буффера приём',
-	'config-property-GeneralConfig-SendBufferSize': 'Размер буфера отправки',
-	'config-property-GeneralConfig-DefaultRsaKeySize': 'Стандартный размер RSA ключа',
-	'config-property-NetworksSaveConfig-SaveFile': 'Имя файла сетей',
-	'config-property-NetworksSaveConfig-SavedEndPointTtl': 'Время до удаления клиента',
-	'config-property-NetworksSaveConfig-SavedEndPointsCleanUpInterval': 'Частота очистки клиентов',
-	'config-property-StunConfig-Host': 'Хост STUN',
-	'config-property-StunConfig-Port': 'Порт STUN',
-	'config-property-StunConfig-PortMappingTimeout': 'Таймаут UPnP/PMP',
-	'config-property-StunConfig-PunchPort': 'Стандартный исходящий порт',
-	'config-property-TapConfig-SelfName': 'Текущее доменное имя',
-	'config-property-TapConfig-IpPrefix': 'Префикс IP адреса',
-	'config-property-TapConfig-MacPrefix': 'Префикс MAC адреса',
-	'config-property-TapConfig-DnsFormat': 'Формат доменов внутри сети',
-	'config-property-VisualizationConfig-ServerIp': 'IP сервера визуализации',
-	'config-property-VisualizationConfig-ServerPort': 'Порт сервера визуализации',
-	'config-property-WebServerConfig-HttpServerIp': 'Внешний IP веб-части',
-	'config-property-WebServerConfig-HttpServerPort': 'Внешний порт HTTP сервера',
-	'config-property-WebServerConfig-WebSocketServerPort': 'Внешний порт WS сервера',
-	'config-property-WebServerConfig-WebSocketTimeout': 'Таймаут подключения к WS'
-};
-
 function notify(type, text) {
 	$.notify({
 		message: text,
@@ -85,7 +38,7 @@ function updateStateGui(state, notification = true) {
 			$('#button-network-generate-start').show();
 			$('#button-network-generate-disconnect').hide();
 			if (notification)
-				notify('danger', 'Отключён от сети (подключение не удалось)');
+				notify('danger', window.language['client-state-message-disconnected']);
 			break;
 		case 1:
 			$('#clients-table-content').find("tr:gt(0)").remove();
@@ -95,11 +48,11 @@ function updateStateGui(state, notification = true) {
 			$('#button-network-generate-start').hide();
 			$('#button-network-generate-disconnect').show();
 			if (notification)
-				notify('success', 'Подключено');
+				notify('success', window.language['client-state-message-connected']);
 			break;
 		case 2:
 			if (notification)
-				notify('warning', 'Подключение...');
+				notify('warning', window.language['client-state-message-connecting']);
 		case 3:
 		case 4:
 			$('#clients-table-content').hide();
@@ -140,7 +93,7 @@ function updateClientRow(id, data) {
 				.html(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>')
 			).append(
 				$('<td>').attr('id', 'connected-client-' + id + '-ping')
-				.text(data.ping == 65535 ? "-" : data.ping + ' мс')
+				.text(data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text'])
 			).append(
 				$('<td>').attr('id', 'connected-client-' + id + '-bytes-received')
 				.text(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived)
@@ -165,7 +118,7 @@ function updateClientRow(id, data) {
 		$('#connected-client-' + id + '-internal-ip').text(data.internalIp);
 		$('#connected-client-' + id + '-internal-domain').text(data.internalDomain);
 		$('#connected-client-' + id + '-direct-connection').html(data.id == window.clientStorage.selfId ? "-" : data.flags & 4 ? '<i class="fas fa-check text-success"></i>' : '<i class="fas fa-times text-danger"></i>');
-		$('#connected-client-' + id + '-ping').text(data.ping == 65535 ? "-" : data.ping + ' мс');
+		$('#connected-client-' + id + '-ping').text(data.ping == 65535 ? "-" : data.ping + ' ' + window.language['ping-ms-text']);
 		$('#connected-client-' + id + '-bytes-received').text(data.id == window.clientStorage.selfId ? "-" : data.bytesReceived);
 		$('#connected-client-' + id + '-bytes-sent').text(data.id == window.clientStorage.selfId ? "-" : data.bytesSent);
 		$('#connected-client-' + id + '-data-bytes-received').text(data.id == window.clientStorage.selfId ? "-" : data.dataBytesReceived);
@@ -350,7 +303,7 @@ jQuery(document).ready(function($) {
 	$('#network-create-modal-button').click(function() {
 		$('#network-create-modal').modal('hide');
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Создание сети...');
+		$('#processing-status').text(window.language['creating-network-front-status']);
 		$.post('/api/createnetwork', JSON.stringify({
 			requestData: {
 				keySize: $('#network-create-key-size').val() == "" ? null : $('#network-create-key-size').val(),
@@ -358,14 +311,14 @@ jQuery(document).ready(function($) {
 			}
 		}), function(data) {
 			$('#processing-loader').fadeOut('fast', 'swing');
-			notify('success', 'Сеть успешно создана');
+			notify('success', window.language['network-created-message']);
 		});
 	});
 
 	$('#network-add-network-modal-button').click(function() {
 		$('#network-add-network-modal').modal('hide');
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Создание сети...');
+		$('#processing-status').text(window.language['creating-network-front-status']);
 		$.post('/api/addnetwork', JSON.stringify({
 			requestData: {
 				key: $('#network-add-network-key-code').val(),
@@ -374,18 +327,18 @@ jQuery(document).ready(function($) {
 		}), function(data) {
 			$('#processing-loader').fadeOut('fast', 'swing');
 			if (data.error == null)
-				notify('success', 'Сеть успешно добавлена. ID: ' + data.networkId);
+				notify('success', window.language['network-key-added-message'].format(data.networkId));
 			else if (data.error == 'network-already-exists')
-				notify('warning', 'Сеть с таким ключ-кодом уже есть. ID: ' + data.networkId);
+				notify('warning', window.language['network-key-network-exists-error'].format(data.networkId));
 			else
-				notify('danger', 'Неправильный формат ключ-кода');
+				notify('danger', window.language['network-key-wrong-format-error']);
 		});
 	});
 
 	$('#network-accept-invitation-modal-button').click(function() {
 		$('#network-accept-invitation-modal').modal('hide');
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Обработка инвайт-кода...');
+		$('#processing-status').text(window.language['processing-invite-code-front-status']);
 		$.post('/api/processinvite', JSON.stringify({
 			requestData: {
 				inviteCode: $('#network-accept-invitation-invite-code').val()
@@ -393,17 +346,17 @@ jQuery(document).ready(function($) {
 		}), function(data) {
 			$('#processing-loader').fadeOut('fast', 'swing');
 			if (data.error == null)
-				notify('success', 'В сеть с ID ' + data.networkId + ' успешно добавлено ' + data.count + ' клиентов');
+				notify('success', window.language['invite-code-added-text'].format(data.networkId, data.count));
 			else if (data.error == 'invite-code-network-not-found')
-				notify('warning', 'Сеть с таким инвайт-кодом не существует. ID: ' + data.networkId);
+				notify('warning', window.language['invite-code-network-not-found-error'].format(data.networkId));
 			else
-				notify('danger', 'Неправильный формат инвайт-кода');
+				notify('danger', window.language['invite-code-wrong-format-error']);
 		});
 	});
 
 	$('#button-network-generate-key-code').click(function() {
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Генерация ключ-кода...');
+		$('#processing-status').text(window.language['generating-network-key-front-status']);
 		$.post('/api/generatekey', JSON.stringify({
 			requestData: {
 				networkId: window.clientStorage.selectedNetworkId
@@ -413,13 +366,13 @@ jQuery(document).ready(function($) {
 								$('#key-code-output').text(data.text);
 				$('#network-generate-key-code-output-modal').modal('show');
 			});
-			notify('success', 'Ключ-код сгенерирован успешно');
+			notify('success', window.language['network-key-generated-message']);
 		});
 	});
 
 	$('#button-network-generate-invite-code').click(function() {
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Генерация инвайт-кода...');
+		$('#processing-status').text(window.language['generating-invite-code-front-status']);
 		$.post('/api/generateinvite', JSON.stringify({
 			requestData: {
 				networkId: window.clientStorage.selectedNetworkId,
@@ -430,20 +383,20 @@ jQuery(document).ready(function($) {
 				$('#invite-code-output').text(data.text);
 				$('#network-generate-invite-code-output-modal').modal('show');
 			});
-			notify('success', 'Инвайт-код сгенерирован успешно');
+			notify('success', window.language['invite-code-generated-message']);
 		});
 	});
 
 	$('#button-network-generate-remove').click(function() {
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Удаление сети...');
+		$('#processing-status').text(window.language['removing-network-front-status']);
 		$.post('/api/removenetwork', JSON.stringify({
 			requestData: {
 				networkId: window.clientStorage.selectedNetworkId
 			}
 		}), function(data) {
 			$('#processing-loader').fadeOut('fast', 'swing', function() {});
-			notify('success', 'Сеть удалена успешно');
+			notify('success', window.language['network-removed-message']);
 		});
 	});
 
@@ -471,7 +424,7 @@ jQuery(document).ready(function($) {
 	$('#network-connect-modal-button').click(function() {
 		$('#network-connect-modal').modal('hide');
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Запуск подключения...');
+		$('#processing-status').text(window.language['connecting-front-status']);
 		$.post('/api/connecttonetwork', JSON.stringify({
 			requestData: {
 				networkId: window.clientStorage.selectedNetworkId,
@@ -486,14 +439,14 @@ jQuery(document).ready(function($) {
 			if (data.error == null)
 				return;
 			else
-				notify('danger', 'Ошибка при обработке подключения');
+				notify('danger', window.language['generic-connection-error']);
 		});
 	});
 
 	$('#network-start-modal-button').click(function() {
 		$('#network-start-modal').modal('hide');
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Запуск подключения...');
+		$('#processing-status').text(window.language['connecting-front-status']);
 		$.post('/api/connecttonetwork', JSON.stringify({
 			requestData: {
 				networkId: window.clientStorage.selectedNetworkId,
@@ -508,9 +461,9 @@ jQuery(document).ready(function($) {
 			if (data.error == null)
 				return;
 			else if (data.error == 'stun-error')
-				notify('danger', 'Ошибка STUN при определении внещнего IP/порта. Попробуйте вручную сделать проброс порта или обратится к администратору сети.');
+				notify('danger', window.language['stun-connection-error']);
 			else
-				notify('danger', 'Ошибка при обработке подключения');
+				notify('danger', window.language['generic-connection-error']);
 		});
 	});
 
@@ -544,7 +497,7 @@ jQuery(document).ready(function($) {
 	$('#save-config-modal-button').click(function() {
 		$('#save-config-modal').modal('hide');
 		$('#processing-loader').fadeIn('fast');
-		$('#processing-status').text('Сохранение настроек...');
+		$('#processing-status').text(window.language['saving-config-front-status']);
 		$.post('/api/updateconfig', JSON.stringify({
 			requestData: {
 				newConfigJson: JSON.stringify(window.clientStorage.lastConfig)

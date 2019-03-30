@@ -1,0 +1,401 @@
+﻿<html>
+    <head>
+        <title>DNMP Client WebUI</title>
+        <link rel="stylesheet" href="/content/css/bootstrap.min.css"/>
+        <link rel="stylesheet" href="/content/css/style.css"/>
+        <link rel="stylesheet" href="/content/css/icons.min.css"/>
+        <link rel="stylesheet" href="/content/css/animate.css"/>
+        <link rel="shortcut icon" href="/content/favicon.ico" type="image/x-icon"/>
+        <script type="text/javascript">
+            window.language = {
+                'client-state-0': 'Not connected',
+                'client-state-2': 'Connecting',    
+                'client-state-1': 'Connected',
+                'client-state-3': 'Linking',
+                'client-state-4': 'Disconnecting',
+                'client-state-message-disconnected': 'Disconnected from the network (or connection failed)',
+                'client-state-message-connected': 'Connected',
+                'client-state-message-connecting': 'Connecting',
+                'ping-ms-text': 'ms',
+                'creating-network-front-status': 'Creating network...',
+                'processing-invite-code-front-status': 'Processing invite-code...',
+                'generating-network-key-front-status': 'Generating network key-code...',
+                'generating-invite-code-front-status': 'Generating invite-code...',
+                'removing-network-front-status': 'Removing network...',
+                'connecting-front-status': 'Connecting...',
+                'saving-config-front-status': 'Saving configuration...',
+                'stun-connection-error': 'STUN error while fetching external endpoint. Try manulally map port or contact network administrator.',
+                'generic-connection-error': 'Unspecified error while connecting',
+                'invite-code-generated-message': 'Invite-code generated successfully',
+                'network-key-generated-message': 'Key-code generated successfully',
+                'invite-code-added-text': 'Successfully added {1} clients to network with ID {0}',
+                'invite-code-wrong-format-error': 'Incorrect invite-code format',
+                'invite-code-network-not-found-error': 'Network with ID ({0}) does not exist',
+                'network-key-wrong-format-error': 'Incorrect network key-code format',
+                'network-key-network-exists-error': 'Network with ID ({0}) had been already added',
+                'network-key-added-message': 'Network has been added successfully. ID: {0}',
+                'network-removed-message': 'Network has been removed successfully',
+                'network-created-message': 'Network has been created successfully',
+                'config-group-ClientConfig': 'DNMP settings',
+                'config-group-GeneralConfig': 'General settings',
+                'config-group-NetworksSaveConfig': 'Network saving settings',
+                'config-group-StunConfig': 'STUN settings',
+                'config-group-TapConfig': 'TAP settings',
+                'config-group-VisualizationConfig': 'Visualization settings',
+                'config-group-WebServerConfig': 'Web server config',
+                'config-property-ClientConfig-ClientTimeout': 'Disconnect by Heartbeat timeout',
+                'config-property-ClientConfig-ConnectionTimeout': 'Connection timeout',
+                'config-property-ClientConfig-HeartbeatDelay': 'Delay between Heartbeats',
+                'config-property-ClientConfig-MaxPingAnswerTime': 'Maximum ping answer time',
+                'config-property-ClientConfig-MaxReliableRetries': 'Maximum number of reliable messages retries',
+                'config-property-ClientConfig-PingSize': 'Ping message size',
+                'config-property-ClientConfig-PingUpdateTimerDelay': 'Delay between PingUpdates',
+                'config-property-ClientConfig-PingUpdateTimerStartDelay': 'PingUpdate start delay',
+                'config-property-ClientConfig-RebalancingTimeout': 'Graph rebalancing timeout',
+                'config-property-ClientConfig-ReconnectionTimeout': 'Reconnection timeout',
+                'config-property-ClientConfig-TokenSize': 'Connection token size',
+                'config-property-ClientConfig-ForcePingUpdateDelay': 'First PingUpdate send delay',
+                'config-property-GeneralConfig-ReceiveBufferSize': 'Receive buffer size',
+                'config-property-GeneralConfig-SendBufferSize': 'Send buffer size',
+                'config-property-GeneralConfig-DefaultRsaKeySize': 'Standard RSA key size',
+                'config-property-NetworksSaveConfig-SaveFile': 'Save file name',
+                'config-property-NetworksSaveConfig-SavedEndPointTtl': 'Client endpoint time to live',
+                'config-property-NetworksSaveConfig-SavedEndPointsCleanUpInterval': 'Saved endpoints cleanup interval',
+                'config-property-StunConfig-Host': 'STUN host',
+                'config-property-StunConfig-Port': 'STUN port',
+                'config-property-StunConfig-PortMappingTimeout': 'UPnP/PMP timeout',
+                'config-property-StunConfig-PunchPort': 'Standard source port',
+                'config-property-TapConfig-SelfName': 'Current domain name',
+                'config-property-TapConfig-IpPrefix': 'IP address prefix',
+                'config-property-TapConfig-MacPrefix': 'MAC address prefix',
+                'config-property-TapConfig-DnsFormat': 'Internetwork domain name format',
+                'config-property-VisualizationConfig-ServerIp': 'Server IP',
+                'config-property-VisualizationConfig-ServerPort': 'Server port',
+                'config-property-WebServerConfig-HttpServerIp': 'Web server binding IP',
+                'config-property-WebServerConfig-HttpServerPort': 'HTTP server binding port',
+                'config-property-WebServerConfig-WebSocketServerPort': 'WebSocket server binding port',
+                'config-property-WebServerConfig-WebSocketTimeout': 'WebSocket connection timeout'
+            };
+        </script>
+    </head>
+    <body>
+        <div id="start-bg-loader"><div class="spinner"></div><div id="current-status">Connecting to the client application...</div></div>
+        <div class="row-main" id="row-main" style="display: none">
+            <div class="sidebar">
+                <div class="sidebar-logo">DNMP</div>
+                <button class="sidebar-button sidebar-button-active" data-content-id="status"><i class="fas fa-info-circle"></i> State</button>
+                <button class="sidebar-button" data-content-id="networks"><i class="fas fa-network-wired"></i> Network</button>
+                <button class="sidebar-button" data-content-id="client-settings"><i class="fas fa-wrench"></i> Settings</button>
+                <div id="dev-mode-checkbox-block">
+	                <input type="checkbox" id="dev-mode">
+	                <label for="dev-mode">Developer mode</label>
+            	</div>
+            </div>
+            <div class="content-main">
+                <div class="content-part" id="content-part-status">
+                    <h1>Current state: <span id="client-state-text">N/A</span></h1>  
+                    <br/>
+                    <div id="clients-table-content">
+                        <h2>Clients (<span id="clients-count">0</span>):</h2>
+                        <br/>
+                        <table class="table table-hover" id="clients-table">
+                            <tr>
+                                <th>ID</th>
+                                <th class="dev-mode">Parent ID</th>
+                                <th class="dev-mode">External endpoint</th>
+                                <th class="dev-mode">Internetwork IP</th>
+                                <th>Internetwork domain</th>
+                                <th>Direct connection</th>
+                                <th>Ping</th>
+                                <th>Bytes received</th>
+                                <th>Bytes sent</th>
+                                <th class="dev-mode">Data bytes received</th>
+                                <th class="dev-mode">Data bytes sent</th>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                <div class="content-part" id="content-part-networks">
+                    <h2>Networks</h2>
+                    <hr>
+                    <div style="margin-bottom: 20px" class="clearfix">
+                        <div style="float: left">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-primary" id="button-create-network" data-toggle="modal" data-target="#network-create-modal">Create network</button>
+                                <button class="btn btn-primary" id="button-add-network" data-toggle="modal" data-target="#network-add-network-modal">Add network by key-code</button>
+                                <button class="btn btn-primary" id="button-accept-invite-code" data-toggle="modal" data-target="#network-accept-invitation-modal">Enter invite-code</button>
+                            </div>
+                        </div>
+                        <div style="float: right">
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-success" id="button-network-generate-key-code" disabled="">Generate key-code</button>
+                                <button class="btn btn-success" id="button-network-generate-invite-code" disabled="">Generate invite-code</button>
+                            </div>
+                            <button class="btn btn-warning" id="button-network-generate-disconnect" style="display: none">Disconnect</button>
+                            <div class="btn-group" role="group">
+                                <button class="btn btn-warning" id="button-network-generate-connect" disabled="" data-toggle="modal" data-target="#network-connect-modal">Connect to network</button>
+                                <button class="btn btn-warning" id="button-network-generate-start" disabled="" data-toggle="modal" data-target="#network-start-modal">Start network</button>
+                            </div>
+                            <button class="btn btn-danger" id="button-network-generate-remove" disabled="">Remove network</button>
+                        </div>
+                    </div>
+                    <table class="table table-hover" id="networks-table">
+                        <tr>
+                            <th style="width: 20%">ID</th>
+                            <th>Name</th>
+                            <th>Saved clients</th>
+                        </tr>
+                    </table>
+                </div>
+                <div class="content-part" id="content-part-client-settings">
+                    <h2>Client settings</h2>
+                    <span class="text-danger">Change the settings at your own risk, because after the change, the app may not launch at all!</span>
+                    <hr>
+                    <div id="client-settings-list">
+                    </div>
+                    <button class="btn btn-primary" id="save-client-config">Save settings</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-create-modal" tabindex="-1" role="dialog" aria-labelledby="network-create-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-create-modal-label">Create new network</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-4 col-form-label">Network name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="network-create-name" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-4 col-form-label">Key size:</label>
+                            <div class="col-sm-8">
+                                <select class="form-control" id="network-create-key-size">
+                                    <option value="">Standard</option>
+                                    <option value="512">512</option>
+                                    <option value="1024">1024</option>
+                                    <option value="2048">2048</option>
+                                    <option value="3072">3072</option>
+                                    <option value="4096">4096</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="network-create-modal-button">Create</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-connect-modal" tabindex="-1" role="dialog" aria-labelledby="network-connect-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-connect-modal-label">Connect to network</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-3 col-form-label">Source port:</label>
+                            <div class="col-sm-5">
+                                <input type="number" id="network-connect-port" class="form-control" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="checkbox" id="network-connect-default-port" checked>
+                                <label for="network-connect-default-port">Use standard</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-12">
+                                <input type="checkbox" id="network-connect-use-upnp" checked>
+                                <label for="network-connect-use-upnp">Use UPnP/PMP</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="network-connect-modal-button">Connect</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-start-modal" tabindex="-1" role="dialog" aria-labelledby="network-start-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-start-modal-label">Start network</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-3 col-form-label">Source port:</label>
+                            <div class="col-sm-5">
+                                <input type="number" id="network-start-port" class="form-control" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="checkbox" id="network-start-default-port" checked>
+                                <label for="network-start-default-port">Use standard</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-3 col-form-label">External IP:</label>
+                            <div class="col-sm-5">
+                                <input type="text" id="network-start-ip" class="form-control" disabled>
+                            </div>
+                            <div class="col-sm-4">
+                                <input type="checkbox" id="network-start-use-stun" checked>
+                                <label for="network-start-use-stun">Use STUN</label>
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <div class="col-sm-12">
+                                <input type="checkbox" id="network-start-use-upnp" checked>
+                                <label for="network-start-use-upnp">Use UPnP/PMP</label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-success" id="network-start-modal-button">Start</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-add-network-modal" tabindex="-1" role="dialog" aria-labelledby="network-add-network-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-add-network-modal-label">Add network by key-code</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group row">
+                            <label for="key-size-select" class="col-sm-4 col-form-label">Network name:</label>
+                            <div class="col-sm-8">
+                                <input type="text" id="network-add-network-name" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="key-size-select" class="form-label">Key-code:</label>
+                            <textarea id="network-add-network-key-code"class="form-control" style="min-height: 500px"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="network-add-network-modal-button">Add</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-accept-invitation-modal" tabindex="-1" role="dialog" aria-labelledby="network-accept-invitation-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-accept-invitation-modal-label">Enter invite-code</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="key-size-select" class="form-label">Invite-code:</label>
+                            <textarea id="network-accept-invitation-invite-code" class="form-control" style="min-height: 500px"></textarea>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="network-accept-invitation-modal-button">Enter</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="modal fade" id="network-generate-key-code-output-modal" tabindex="-1" role="dialog" aria-labelledby="network-generate-key-code-output-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-generate-key-code-output-modal-label">Key-code</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="key-code-output">
+                            KEYCODEDATA
+                        </pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="network-generate-invite-code-output-modal" tabindex="-1" role="dialog" aria-labelledby="network-generate-invite-code-modal" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="network-generate-invite-code-modal">Invite-code</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <pre id="invite-code-output">
+                            INVITECODEDATA
+                        </pre>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal fade" id="save-config-modal" tabindex="-1" role="dialog" aria-labelledby="save-config-modal-label" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="save-config-modal-label">Save settings</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <h5><span class="text-danger">Attention! When you save the settings, the current connection will be interrupted and the program will close. If the settings are incorrect, the program may not launch at all!</span></h5>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-primary" id="save-config-modal-button">Save and close</button>
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="processing-loader" style="display: none"><div class="spinner spinner-white"></div><div id="processing-status"></div></div>
+
+        <script src="/content/js/jquery.min.js"></script>
+        <script src="/content/js/popper.min.js"></script>
+        <script src="/content/js/bootstrap.min.js"></script>
+        <script src="/content/js/bootstrap-notify.min.js"></script>
+        <script src="/content/js/main.js"></script>
+    </body>
+</html>

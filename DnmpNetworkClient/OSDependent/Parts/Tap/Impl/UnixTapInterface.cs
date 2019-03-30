@@ -72,7 +72,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
                     FileName = "dhclient",
                     CreateNoWindow = true,
                     UseShellExecute = false,
-                    Arguments = interfaceName,
+                    Arguments = "-timeout 10 " + interfaceName,
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
                 }

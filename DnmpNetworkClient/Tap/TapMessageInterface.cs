@@ -97,7 +97,7 @@ namespace DnmpNetworkClient.Tap
                 return false;
             cancellationTokenSource = new CancellationTokenSource();
             initialized = true;
-            StartAsyncReadData(cancellationTokenSource.Token);
+            //StartAsyncReadData(cancellationTokenSource.Token);
             await Task.Delay(0);
             return true;
         }
@@ -110,6 +110,7 @@ namespace DnmpNetworkClient.Tap
             cancellationTokenSource.Cancel();
             tapInterface.Close();
             initialized = false;
+            logger.Info("TAP stopped");
         }
 
         public override async void PacketReceived(object sender, DataMessageEventArgs eventArgs)

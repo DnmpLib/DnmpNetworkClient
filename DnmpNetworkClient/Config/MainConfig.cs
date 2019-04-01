@@ -51,6 +51,8 @@ namespace DnmpNetworkClient.Config
     [ValidableConfig]
     internal class StunConfig
     {
+        private static readonly Random random = new Random();
+
         [ValidableField("[a-z0-9]+([\\-\\.]{1}[a-z0-9]+)*\\.[a-z]{2,5}(:[0-9]{1,5})?(\\/.*)?|^(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])")]
         public string Host = "stun.l.google.com";
 
@@ -61,7 +63,7 @@ namespace DnmpNetworkClient.Config
         public int PortMappingTimeout = 1000;
 
         [ValidableField("([1-9][0-9]{0,3}|[1-5][0-9]{4}|6[0-4][0-9]{3}|65[0-4][0-9]{2}|655[0-2][0-9]|6553[0-5])")]
-        public int PunchPort = 51966;
+        public int PunchPort = random.Next(45000, 55000);
     }
 
     [ValidableConfig]

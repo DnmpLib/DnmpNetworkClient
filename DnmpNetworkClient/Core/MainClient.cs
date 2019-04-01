@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Threading.Tasks;
 using DnmpLibrary.Client;
 using DnmpLibrary.Interaction.Protocol.EndPointImpl;
@@ -57,6 +59,61 @@ namespace DnmpNetworkClient.Core
             HttpServer = new ClientHttpServer(this);
         }
 
+        private static readonly Random random = new Random();
+
+        private static IEnumerable<IPAddress> GetTraceRoute(IPAddress ipAddress, int ttl)
+        {
+            var pinger = new Ping();
+            const int timeout = 600;
+            var buffer = new byte[32];
+            var result = new HashSet<IPAddress>();
+            for (var i = 1; i < ttl; i++)
+            {
+                random.NextBytes(buffer);
+                var reply = pinger.Send(ipAddress, timeout, buffer, new PingOptions(i, true));
+                if (reply == null)
+                    break;
+                switch (reply.Status)
+                {
+                    case IPStatus.Success:
+                        result.Add(reply.Address);
+                        break;
+                    case IPStatus.TtlExpired:
+                        result.Add(reply.Address);
+                        break;
+                    case IPStatus.TimedOut:
+                        break;
+                    case IPStatus.DestinationNetworkUnreachable:
+                    case IPStatus.DestinationHostUnreachable:
+                    case IPStatus.DestinationProtocolUnreachable:
+                    case IPStatus.DestinationPortUnreachable:
+                    case IPStatus.NoResources:
+                    case IPStatus.BadOption:
+                    case IPStatus.HardwareError:
+                    case IPStatus.PacketTooBig:
+                    case IPStatus.BadRoute:
+                    case IPStatus.TtlReassemblyTimeExceeded:
+                    case IPStatus.ParameterProblem:
+                    case IPStatus.SourceQuench:
+                    case IPStatus.BadDestination:
+                    case IPStatus.DestinationUnreachable:
+                    case IPStatus.TimeExceeded:
+                    case IPStatus.BadHeader:
+                    case IPStatus.UnrecognizedNextHeader:
+                    case IPStatus.IcmpError:
+                    case IPStatus.DestinationScopeMismatch:
+                    case IPStatus.Unknown:
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException();
+                }
+                if (reply.Status == IPStatus.TimedOut || reply.Status == IPStatus.Success)
+                    break;
+            }
+
+            return result;
+        }
+
         public void Connect(Guid networkId, int sourcePort, bool startAsFirst, IPAddress publicIp, bool useUpnp = true, bool useStun = true)
         {
             var networkConnectData = NetworkManager.SavedNetworks[networkId].GetConnectionData();
@@ -64,9 +121,11 @@ namespace DnmpNetworkClient.Core
             if (useUpnp)
                 PortMapperUtils.TryMapPort(sourcePort, Config.StunConfig.PortMappingTimeout).Wait();
 
+            var endPoints = new HashSet<IPEndPoint>();
+
             if (startAsFirst)
             {
-                EndPoint stunnedEndPoint;
+                IPEndPoint stunnedEndPoint;
 
                 if (useStun)
                 {
@@ -91,7 +150,17 @@ namespace DnmpNetworkClient.Core
                     stunnedEndPoint = new IPEndPoint(publicIp, sourcePort);
                 }
 
-                NetworkManager.AddEndPoint(networkId, new RealIPEndPoint((IPEndPoint)stunnedEndPoint));
+                foreach (var ip in GetTraceRoute(stunnedEndPoint.Address, 32))
+                {
+                    endPoints.Add(new IPEndPoint(ip, stunnedEndPoint.Port));
+                    endPoints.Add(new IPEndPoint(ip, sourcePort));
+                }
+
+                endPoints.Add(stunnedEndPoint);
+                endPoints.Add(new IPEndPoint(IPAddress.Loopback, sourcePort));
+
+                foreach (var endPoint in endPoints)
+                    NetworkManager.AddEndPoint(networkId, new RealIPEndPoint(endPoint));
                 NetworkManager.SaveNetworks();
                 WebSocketServer.BroadcastNetworkList();
                 Task.Run(() => DnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AesSymmetricKey(), selfNodeData.GetBytes()));

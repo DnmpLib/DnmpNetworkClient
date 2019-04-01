@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Runtime.InteropServices;
 using System.Security.Principal;
 using System.Threading;
 using System.Windows.Forms;
@@ -16,7 +15,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Runtime.Impl
             {
                 MessageBox.Show(@"Только один экземпляр приложения может быть запущен!", @"Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
-                return;
+                Environment.Exit(1);
             }
 
             using (var identity = WindowsIdentity.GetCurrent())
@@ -26,6 +25,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Runtime.Impl
                     return;
                 MessageBox.Show(@"Для работы TAP-интерфейса требуются права администратора!", @"Ошибка",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
+                Environment.Exit(1);
             }
         }
 

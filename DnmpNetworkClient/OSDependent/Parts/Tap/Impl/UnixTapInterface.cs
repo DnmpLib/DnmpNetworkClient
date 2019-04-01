@@ -5,7 +5,6 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using DnmpLibrary.Util;
 using Mono.Unix.Native;
 using Mono.Unix;
 using NLog;

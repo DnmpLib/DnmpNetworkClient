@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
+using System.Threading.Tasks;
+using DnmpLibrary.Util;
 using Mono.Unix.Native;
 using Mono.Unix;
 using NLog;
@@ -63,26 +65,31 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
             return currentStream;
         }
 
-        private static void RenewDhcp(string interfaceName)
+        private Process dhclientProcess;
+
+        private async void RenewDhcp(string interfaceName)
         {
-            var dhclientProcess = new Process
+            await Task.Delay(2000);
+            dhclientProcess = new Process
             {
                 StartInfo = new ProcessStartInfo
                 {
                     FileName = "dhclient",
                     CreateNoWindow = true,
                     UseShellExecute = false,
-                    Arguments = "-timeout 10 " + interfaceName,
+                    Arguments = $"-d -v {interfaceName}",
                     RedirectStandardOutput = true,
                     RedirectStandardError = true
-                }
+                },
+                EnableRaisingEvents = true
             };
+            dhclientProcess.Exited += (o, e) => { logger.Debug($"dhclient exited! Exit code: {dhclientProcess.ExitCode}"); };
+            dhclientProcess.OutputDataReceived += (o, e) => { logger.Debug($"[dhclient] [stdout] {e.Data}"); };
+            dhclientProcess.ErrorDataReceived += (o, e) => { logger.Debug($"[dhclient] [stderr] {e.Data}"); };
             dhclientProcess.Start();
-            logger.Debug("dhclient started!");
-            dhclientProcess.Exited += (o, e) =>
-            {
-                logger.Debug($"dhclient exited! Exit code: {dhclientProcess.ExitCode}");
-            };
+            dhclientProcess.BeginOutputReadLine();
+            dhclientProcess.BeginErrorReadLine();
+            logger.Debug($"dhclient started as PID #{dhclientProcess.Id}!");
         }
 
         private sealed class RawUnixStream : Stream, IDisposable
@@ -197,6 +204,18 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
 
         public void Close()
         {
+            if (dhclientProcess != null)
+            {
+                try
+                {
+                    dhclientProcess.Kill();
+                }
+                catch (Exception)
+                {
+                    //ignore
+                }
+                dhclientProcess = null;
+            }
             currentStream.Close();
             currentStream = null;
         }

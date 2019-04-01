@@ -97,7 +97,7 @@ namespace DnmpNetworkClient.Tap
                 return false;
             cancellationTokenSource = new CancellationTokenSource();
             initialized = true;
-            //StartAsyncReadData(cancellationTokenSource.Token);
+            StartAsyncReadData(cancellationTokenSource.Token);
             await Task.Delay(0);
             return true;
         }

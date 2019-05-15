@@ -2,8 +2,8 @@
 {
     internal class DummyRuntime : IRuntime
     {
-        public void PreInit() { }
+        public void PreInit(bool useGui) { }
 
-        public void PostInit() { }
+        public void PostInit(bool useGui) { }
     }
 }

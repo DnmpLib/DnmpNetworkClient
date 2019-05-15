@@ -125,7 +125,7 @@ namespace DnmpNetworkClient.Core
 
             if (startAsFirst)
             {
-                IPEndPoint stunnedEndPoint;
+                IPEndPoint stunnedEndPoint = null;
 
                 if (useStun)
                 {
@@ -137,17 +137,33 @@ namespace DnmpNetworkClient.Core
                     }
                     catch (Exception)
                     {
-                        throw new ClientException("stun-error");
+                        // ignored
                     }
 
                     if (stunnedEndPoint == null)
                     {
-                        throw new ClientException("stun-error");
+                        WebSocketServer.BroadcastNotification("stun-error");
+                        stunnedEndPoint = new IPEndPoint(IPAddress.Loopback, sourcePort);
                     }
                 }
                 else
                 {
                     stunnedEndPoint = new IPEndPoint(publicIp, sourcePort);
+                }
+
+                foreach (var networkInterface in NetworkInterface.GetAllNetworkInterfaces())
+                {
+                    if (!(networkInterface.NetworkInterfaceType == NetworkInterfaceType.Wireless80211 ||
+                          networkInterface.NetworkInterfaceType == NetworkInterfaceType.Ethernet))
+                        continue;
+                    if (networkInterface.OperationalStatus != OperationalStatus.Up)
+                        continue;
+                    foreach (var ip in networkInterface.GetIPProperties().UnicastAddresses)
+                        if (ip.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            endPoints.Add(new IPEndPoint(ip.Address, sourcePort));
+                            endPoints.Add(new IPEndPoint(ip.Address, stunnedEndPoint.Port));
+                        }
                 }
 
                 foreach (var ip in GetTraceRoute(stunnedEndPoint.Address, 32))
@@ -159,11 +175,11 @@ namespace DnmpNetworkClient.Core
                 endPoints.Add(stunnedEndPoint);
                 endPoints.Add(new IPEndPoint(IPAddress.Loopback, sourcePort));
 
-                foreach (var endPoint in endPoints)
+                foreach (var endPoint in endPoints.Where(x => x.Port > 0 && !x.Address.GetAddressBytes().SequenceEqual(IPAddress.Any.GetAddressBytes())))
                     NetworkManager.AddEndPoint(networkId, new RealIPEndPoint(endPoint));
                 NetworkManager.SaveNetworks();
                 WebSocketServer.BroadcastNetworkList();
-                Task.Run(() => DnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint((IPEndPoint)stunnedEndPoint), networkConnectData.Item2, new AesSymmetricKey(), selfNodeData.GetBytes()));
+                Task.Run(() => DnmpClient.StartAsFirstNodeAsync(new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), new RealIPEndPoint(stunnedEndPoint), networkConnectData.Item2, new AesSymmetricKey(), selfNodeData.GetBytes()));
             }
             else
                 Task.Run(() => DnmpClient.ConnectManyAsync(networkConnectData.Item1.ToArray(), new RealIPEndPoint(new IPEndPoint(IPAddress.Any, sourcePort)), true, networkConnectData.Item2, new AesSymmetricKey(), selfNodeData.GetBytes()));

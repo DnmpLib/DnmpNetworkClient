@@ -8,6 +8,7 @@
         ClientDisconnect,
         ClientUpdate,
         NetworkListUpdate,
+        Notification
     }
 
     internal enum WebGuiRequestType

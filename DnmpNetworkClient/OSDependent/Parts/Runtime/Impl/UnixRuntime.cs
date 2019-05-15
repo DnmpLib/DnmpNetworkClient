@@ -9,7 +9,7 @@ namespace DnmpNetworkClient.OSDependent.Parts.Runtime.Impl
     {
         private static readonly Logger logger = LogManager.GetCurrentClassLogger();
 
-        public void PreInit()
+        public void PreInit(bool useGui)
         {
             var descriptor = Syscall.open("/dev/net/tun", OpenFlags.O_RDWR);
             
@@ -26,10 +26,10 @@ namespace DnmpNetworkClient.OSDependent.Parts.Runtime.Impl
                     return;
             }
 
-            logger.Error("Need sudo for TUN/TAP interface!");
+            logger.Error("Need root access for TUN/TAP interface!");
             Environment.Exit(0);
         }
 
-        public void PostInit() { }
+        public void PostInit(bool useGui) { }
     }
 }

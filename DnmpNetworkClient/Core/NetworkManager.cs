@@ -13,11 +13,14 @@ using DnmpLibrary.Util.BigEndian;
 using DnmpNetworkClient.Config;
 using DnmpNetworkClient.Util;
 using Newtonsoft.Json;
+using NLog;
 
 namespace DnmpNetworkClient.Core
 {
     internal class NetworkManager
     {
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+
         public class SavedNetwork
         {
             [JsonIgnore]
@@ -45,10 +48,10 @@ namespace DnmpNetworkClient.Core
             public byte[] GenerateInviteData(int maxLength)
             {
                 if (maxLength < 16)
-                    throw new ArgumentException(@"maxLength should be at least 18", nameof(maxLength));
+                    throw new ArgumentException($@"{nameof(maxLength)} should be at least 18", nameof(maxLength));
                 var memoryStream = new MemoryStream();
                 var binaryWriter = new BigEndianBinaryWriter(memoryStream);
-                var allEndPoints = SavedIpEndPoints.Select(x => x.Key).Select(Convert.FromBase64String).OrderBy(x => x.Length).ThenBy(x => Guid.NewGuid()).ToList(); // magic random shuffle
+                var allEndPoints = SavedIpEndPoints.Select(x => x.Key).Select(Convert.FromBase64String).OrderBy(x => x.Length).ThenBy(x => Guid.NewGuid()).ToList();
                 var needCount = 0;
                 var totalLength = 16;
                 while (totalLength < maxLength && needCount < allEndPoints.Count)
@@ -104,6 +107,7 @@ namespace DnmpNetworkClient.Core
 
         public void AddEndPoint(Guid networkId, RealIPEndPoint endPoint)
         {
+            logger.Debug($"Added {endPoint} to {networkId}");
             savedNetworks[networkId].SavedIpEndPoints[Convert.ToBase64String(new RealIPEndPointFactory().SerializeEndPoint(endPoint))] = DateTime.Now;
         }
 

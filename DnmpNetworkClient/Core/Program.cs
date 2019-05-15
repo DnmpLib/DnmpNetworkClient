@@ -15,22 +15,10 @@ namespace DnmpNetworkClient.Core
 
         private static MainClient client;
 
-        private static void RunDefault()
-        {
-            dependent.GetGui().Start(client.Config);
-            dependent.GetRuntime().PostInit();
-            client.StartServers();
-            while (client.Running)
-                Thread.Sleep(1);
-        }
-
-        private static void RunConsole()
-        {
-
-        }
-
         private static void Main(string[] args)
         {
+            var useGui = args.Length == 0;
+
             switch (Environment.OSVersion.Platform)
             {
                 case PlatformID.Win32NT:
@@ -41,6 +29,7 @@ namespace DnmpNetworkClient.Core
                     dependent = new WindowsDependent();
                     break;
                 case PlatformID.Unix:
+                    useGui = false;
                     logger.Info("Found Unix");
                     dependent = new UnixDependent();
                     break;
@@ -55,7 +44,7 @@ namespace DnmpNetworkClient.Core
                     return;
             }
 
-            dependent.GetRuntime().PreInit();
+            dependent.GetRuntime().PreInit(useGui);
             logger.Info("Starting...");
 
             AppDomain.CurrentDomain.UnhandledException += (s, e) =>
@@ -68,43 +57,13 @@ namespace DnmpNetworkClient.Core
             };
 
             client = new MainClient("config.json", dependent);
-            
-            if (args.Length == 0)
-                RunDefault();
-            //else
-            //{
-            //    switch (args[0])
-            //    {
-            //        case "networks":
-            //            break;
-            //        case "connect":
-            //            if (args.Length < 2)
-            //            {
-            //                logger.Error(@"Not enough args");
-            //                return;
-            //            }
 
-            //            var networkIdString = args[1];
-            //            if (Guid.TryParse(networkIdString, out var networkId))
-            //            {
-            //                if (client.NetworkManager.SavedNetworks.ContainsKey(networkId))
-            //                {
-
-            //                }
-            //            }
-            //            else
-            //            {
-            //                logger.Error(@"Wrong gui format");
-            //            }
-            //            break;
-            //        case "run":
-            //            RunConsole();
-            //            break;
-            //        default:
-            //            logger.Error(@$"Unknown command '{args[0]}'");
-            //            break;
-            //    }
-            //}
+            dependent.GetGui().Start(client.Config);
+            dependent.GetRuntime().PostInit(useGui);
+            client.StartServers();
+            while (client.Running)
+                Thread.Sleep(1);
+            client.StopServers();
         }
     }
 }

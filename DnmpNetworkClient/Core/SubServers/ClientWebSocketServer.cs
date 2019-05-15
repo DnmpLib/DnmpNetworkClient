@@ -187,6 +187,20 @@ namespace DnmpNetworkClient.Core.SubServers
                 BroadcastClientUpdate(clientId == mainClient.DnmpClient.SelfClient.Id ? mainClient.DnmpClient.SelfClient : mainClient.DnmpClient.ClientsById[clientId]);
         }
 
+        public void BroadcastNotification(string notificationName)
+        {
+            if (!running)
+                return;
+            webSocketServer.Broadcast(JsonConvert.SerializeObject(new
+            {
+                eventType = WebGuiEventType.Notification,
+                eventData = new
+                {
+                    name = notificationName
+                }
+            }));
+        }
+
         public void BroadcastNetworkList()
         {
             if (!running)

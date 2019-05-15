@@ -2,7 +2,7 @@
 {
     internal interface IRuntime
     {
-        void PreInit();
-        void PostInit();
+        void PreInit(bool useGui);
+        void PostInit(bool useGui);
     }
 }

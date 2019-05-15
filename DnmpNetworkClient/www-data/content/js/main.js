@@ -1,5 +1,12 @@
 window.clientStorage = {};
 
+window.notifications = {
+	'stun-error': {
+		type: 'warning',
+		text: window.language['notification-stun-error']
+	}
+};
+
 $.fn.extend({
 	scrollToMe: function() {
 	    var x = jQuery(this).offset().top - 100;
@@ -10,7 +17,7 @@ $.fn.extend({
 function notify(type, text) {
 	$.notify({
 		message: text,
-	},{
+	}, {
 		// settings
 		element: 'body',
 		position: null,
@@ -198,6 +205,10 @@ function generateConfigGroup(groupName, config) {
 	return output;
 }
 
+function processNotification(name) {
+	notify(window.notifications[name].type, window.notifications[name].text);
+}
+
 function processMessage(event) {
 	var data = JSON.parse(event.data);
 	switch (data.eventType) {
@@ -228,7 +239,7 @@ function processMessage(event) {
 			$('#row-main').fadeIn('fast');
 			break;
 
-		case 1: 
+		case 1: // SelfStatusChange
 			var state = data.eventData.status;
 			updateStateGui(state);
 			switch (state) {
@@ -267,6 +278,9 @@ function processMessage(event) {
 						updateNetworkControlButtons();
 					}
 				}
+			break;
+		case 6:
+			processNotification(data.eventData.name);
 			break;
 	}
 }
@@ -470,10 +484,8 @@ jQuery(document).ready(function($) {
 			$('#processing-loader').fadeOut('fast', 'swing');
 			if (data.error == null)
 				return;
-			else if (data.error == 'stun-error')
-				notify('danger', window.language['stun-connection-error']);
 			else
-				notify('danger', window.language['generic-connection-error']);
+				notify('danger', window.language['generic-connection-error'].format(data.error));
 		});
 	});
 

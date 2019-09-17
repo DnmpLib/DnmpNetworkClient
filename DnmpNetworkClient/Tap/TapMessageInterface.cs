@@ -86,7 +86,7 @@ namespace DnmpNetworkClient.Tap
                 new PhysicalAddress(new[] { tapMacPrefix[0], tapMacPrefix[1], tapMacPrefix[2], tapMacPrefix[3], (byte)((id + ipMacPoolShift) / 256), (byte)((id + ipMacPoolShift) % 256) });
         }
 
-        public override async Task<bool> Initialize(ushort newSelfId)
+        public override bool Initialize(ushort newSelfId)
         {
             if (initialized)
                 return false;
@@ -97,8 +97,7 @@ namespace DnmpNetworkClient.Tap
                 return false;
             cancellationTokenSource = new CancellationTokenSource();
             initialized = true;
-            StartAsyncReadData(cancellationTokenSource.Token);
-            await Task.Delay(0);
+            StartAsyncReadData(cancellationTokenSource.Token).ConfigureAwait(false);
             return true;
         }
 
@@ -142,7 +141,7 @@ namespace DnmpNetworkClient.Tap
             return 0xFFFC;
         }
 
-        public async void StartAsyncReadData(CancellationToken cancellationToken)
+        public async Task StartAsyncReadData(CancellationToken cancellationToken)
         {
             logger.Info("TAP started");
             while (!cancellationToken.IsCancellationRequested)

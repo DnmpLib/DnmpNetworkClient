@@ -5,8 +5,8 @@ using System.Linq;
 using System.Net.NetworkInformation;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
-using Mono.Unix.Native;
 using Mono.Unix;
+using Mono.Unix.Native;
 using NLog;
 
 namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
@@ -82,7 +82,10 @@ namespace DnmpNetworkClient.OSDependent.Parts.Tap.Impl
                 },
                 EnableRaisingEvents = true
             };
-            dhclientProcess.Exited += (o, e) => { logger.Debug($"dhclient exited! Exit code: {dhclientProcess.ExitCode}"); };
+            dhclientProcess.Exited += (o, e) =>
+            {
+                logger.Debug($"dhclient exited! Exit code: {(dhclientProcess == null ? "(killed)" : $"{dhclientProcess.ExitCode}")}");
+            };
             dhclientProcess.OutputDataReceived += (o, e) => { logger.Debug($"[dhclient] [stdout] {e.Data}"); };
             dhclientProcess.ErrorDataReceived += (o, e) => { logger.Debug($"[dhclient] [stderr] {e.Data}"); };
             dhclientProcess.Start();

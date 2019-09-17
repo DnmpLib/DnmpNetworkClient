@@ -112,7 +112,7 @@ namespace DnmpNetworkClient.Tap
             logger.Info("TAP stopped");
         }
 
-        public override async void PacketReceived(object sender, DataMessageEventArgs eventArgs)
+        public override async Task PacketReceived(object sender, DataMessageEventArgs eventArgs)
         {
             if (!initialized)
                 return;
@@ -132,7 +132,7 @@ namespace DnmpNetworkClient.Tap
 
             var packetData = ethernetPacket.ToBytes();
 
-            await tapStream.WriteAsync(packetData, 0, packetData.Length);
+            tapStream.Write(packetData, 0, packetData.Length);
             await Task.Delay(0);
         }
 
